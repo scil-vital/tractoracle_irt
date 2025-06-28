@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools >= 61.0", "torch==2.7.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tractoracle_irt"
+version = "0.1.0"
+authors = [
+    { name="Jeremi Levesque", email="jeremi.levesque@usherbrooke.ca" }
+]
+description = "RL-based tractography with policy-aligned reward model"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'Development Status :: 3 - Alpha',
+    'Intended Audience :: Science/Research',
+    'Topic :: Scientific/Engineering :: Artificial Intelligence',
+]
+keywords = ["reinforcement-learning", "tractography", "diffusion-MRI"]
+dependencies = [
+    "scilpy @ git+https://github.com/levje/scilpy@levje/spams-upgrade",
+    "nextflowpy>=0.11.0",
+    "pytest>=7.2.2",
+    "seaborn>=0.13.2",
+    "torchmetrics>=1.7.1",
+    "h5py>=3.10",
+    "scipy>=1.11",
+    "dipy>=1.10",
+    "nibabel>=5.2",
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "torchaudio==2.7.1",
+    "numpy==1.25",
+    "comet-ml>=3.22.0",
+    "pyyaml>=6.0"
+]
+
+[project.urls]
+Repository = "https://github.com/scil-vital/tractoracle_irt"
