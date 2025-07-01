@@ -28,13 +28,11 @@ from tractoracle_irt.environments.reward import RewardFunction
 from tractoracle_irt.environments.stopping_criteria import (
     BinaryStoppingCriterion, OracleStoppingCriterion,
     StoppingFlags)
-from tractoracle_irt.environments.utils import (  # is_looping,
+from tractoracle_irt.environments.utils import (
     is_too_curvy, is_too_long, has_reached_gm)
 from tractoracle_irt.utils.utils import normalize_vectors, Timer
-from tractoracle_irt.environments.rollout_env import RolloutEnvironment
 from tractoracle_irt.environments.state import ConvState, State
-from tractoracle_irt.algorithms.shared.fodf_encoder import WorkingFodfEncoder, SmallWorkingFodfEncoder, DummyFodfEncoder
-from tractoracle_irt.utils.interpolation import calc_neighborhood_grid, neighborhood_interpolation
+from tractoracle_irt.algorithms.shared.fodf_encoder import SmallWorkingFodfEncoder
 from scilpy.tractograms.tractogram_operations import transform_warp_sft
 
 LOGGER = get_logger(__name__)
@@ -146,7 +144,6 @@ class BaseEnv(object):
         self.device = env_dto['device']
         self.target_sh_order = env_dto['target_sh_order']
         self.reward_with_gt = env_dto['reward_with_gt']
-        self.rollout_env = None
 
         # Extractor parameters
         self.extractor_target = None
@@ -655,10 +652,6 @@ class BaseEnv(object):
         voxel_size = np.mean(np.abs(diag))
 
         return voxel_size
-
-    def setup_rollout_env(self, rollout_env: RolloutEnvironment):
-        LOGGER.info('Setting up rollout environment')
-        self.rollout_env = rollout_env
 
     def _format_actions(
         self,

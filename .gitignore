@@ -87,3 +87,5 @@ configs/*.yml
 .data/
 .nextflow/
 venv/
+.DS_Store
+*.ckpt

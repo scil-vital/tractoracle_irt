@@ -194,37 +194,6 @@ class TrackingEnvironment(BaseEnv):
             (self.continue_idx[~stopping],
              self.continue_idx[stopping])
 
-        # Before declaring the trajectory over, we will backtrack a few steps on each failed trajectory and rollout a few times
-        # for each failed trajectory and take the new trajectory that maximises a certain parameter (Oracle's value, or distance
-        # to the border for example).
-        if self.rollout_env is not None \
-            and (self.stopping_idx.size > 0):
-            (new_streamlines, new_continuing_streamlines,
-             new_stopping_idx, new_stopping_flags) = \
-                self.rollout_env.rollout(
-                    self.streamlines,
-                    self.stopping_idx,
-                    new_flags[stopping],
-                    self.length,
-                    self.stopping_criteria,
-                    self._format_state,
-                    self._format_actions,
-                    self.affine_vox2rasmm)
-
-            self.streamlines = new_streamlines
-
-            self.new_continue_idx = \
-                np.concatenate((self.new_continue_idx, new_continuing_streamlines))
-            self.new_continue_idx.sort()
-
-            self.stopping_idx = new_stopping_idx
-            
-            # Remove "saved" streamlines from stopping
-            new_not_stopping_indices = np.where(np.isin(self.continue_idx, new_continuing_streamlines))[0]
-            stopping[new_not_stopping_indices] = False
-            new_flags[stopping] = new_stopping_flags[new_stopping_flags != 0]
-
-
         # Keep the reason why tracking stopped
         self.flags[
             self.stopping_idx] = new_flags[stopping]

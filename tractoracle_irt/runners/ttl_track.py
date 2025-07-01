@@ -6,10 +6,9 @@ import numpy as np
 import os
 import random
 import torch
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, fields
 
 from argparse import RawTextHelpFormatter
-from os.path import join
 
 from dipy.io.utils import get_reference_info, create_tractogram_header
 from nibabel.streamlines import detect_format
@@ -23,26 +22,13 @@ from scilpy.tracking.utils import verify_streamline_length_options
 from tractoracle_irt.algorithms.sac_auto import SACAuto
 from tractoracle_irt.algorithms.cross_q import CrossQ
 from tractoracle_irt.algorithms.dro_q import DroQ
-from tractoracle_irt.algorithms.ppo import PPO
 from tractoracle_irt.datasets.utils import MRIDataVolume
 
 from tractoracle_irt.experiment.experiment import Experiment
 from tractoracle_irt.tracking.tracker import Tracker
 from tractoracle_irt.utils.torch_utils import get_device
-from tractoracle_irt.environments.rollout_env import \
-    (RolloutEnvironment, RolloutUtilityTracker, RolloutStats)
-from tractoracle_irt.oracles.oracle import OracleSingleton
-from tractoracle_irt.algorithms.shared.hyperparameters import HParams
 from tractoracle_irt.utils.logging import get_logger
 from tractoracle_irt.utils.utils import prettier_dict
-
-# Define the example model paths from the install folder.
-# Hackish ? I'm not aware of a better solution but I'm
-# open to suggestions.
-_ROOT = os.sep.join(os.path.normpath(
-    os.path.dirname(__file__)).split(os.sep)[:-2])
-DEFAULT_MODEL = os.path.join(
-    _ROOT, 'models')
 
 LOGGER = get_logger(__name__)
 
@@ -53,7 +39,6 @@ class TrackConfig:
     in_mask: str
     in_seed: str
     input_wm: bool
-    gm_mask: str
     out_tractogram: str
     noise: float
     binary_stopping_threshold: float
@@ -63,7 +48,6 @@ class TrackConfig:
     min_length: int
     max_length: int
     save_seeds: bool
-    mc_oracle_checkpoint: str
     agent_checkpoint: str
     rng_seed: int
 
@@ -131,7 +115,6 @@ class Track(Experiment):
         self.in_seed = self.hp.in_seed
         self.in_mask = self.hp.in_mask
         self.input_wm = self.hp.input_wm
-        self.gm_mask = self.hp.gm_mask
         self.in_fa = self.hp.fa_map_file
         self.in_peaks = self.hp.in_peaks
 
@@ -165,9 +148,6 @@ class Track(Experiment):
             checkpoint_dir, 'hyperparameters.json'))
         
         self.hp.update_with_dict(self.hparams, overwrite=False)
-
-        # Monte Carlo Oracle
-        self.mc_oracle_checkpoint = self.hp.mc_oracle_checkpoint
 
         torch.manual_seed(self.hp.rng_seed)
         np.random.seed(self.hp.rng_seed)
@@ -245,35 +225,16 @@ class Track(Experiment):
         # Run tracking
         env.load_subject()
 
-        if self.mc_oracle_checkpoint:
-            oracle = OracleSingleton(self.mc_oracle_checkpoint, device=self.device)
-            utility_tracker = RolloutUtilityTracker(self.n_actor)
-            rollout_stats = RolloutStats()
-            rollout_env = RolloutEnvironment(
-                ref_img, oracle,
-                min_streamline_steps=env.min_nb_steps + 1,
-                max_streamline_steps=env.max_nb_steps + 1,
-                rollout_stats=rollout_stats,
-                utility_tracker=utility_tracker)
-            rollout_env.setup_rollout_agent(alg.agent)
-
         # Initialize Tracker, which will handle streamline generation
-
         tracker = Tracker(
             alg, self.hp.n_actor, compress=self.hp.compress,
             min_length=self.hp.min_length, max_length=self.hp.max_length,
             save_seeds=self.hp.save_seeds, prob=1.0)
-
-        if self.mc_oracle_checkpoint:
-            env.setup_rollout_env(rollout_env)
         
         filetype = detect_format(self.hp.out_tractogram)
         
         stopping_stats = {} # Stopping stats dict that will get populated when tracking is done.
-        tractogram = tracker.track_mc(env, filetype, stopping_stats=stopping_stats)
-
-        # if self.mc_oracle_checkpoint:
-            # print(prettier_dict(rollout_stats.get_stats(), title='Tracking Rollout Stats'))
+        tractogram = tracker.track(env, filetype, stopping_stats=stopping_stats)
 
         reference = get_reference_info(self.hp.reference_file)
         header = create_tractogram_header(filetype, *reference)
@@ -281,10 +242,6 @@ class Track(Experiment):
         # Use generator to save the streamlines on-the-fly
         nib.streamlines.save(tractogram, self.hp.out_tractogram, header=header)
         print(prettier_dict(stopping_stats, title='Stopping stats'))
-
-        # from dipy.io.streamline import save_tractogram
-        # sft = self.convert_to_rasmm_sft(tractogram, env.affine_vox2rasmm, env.reference, discard_dps=self.discard_dps)
-        # save_tractogram(sft, self.hp.out_tractogram, bbox_valid_check=False)
 
 
 def add_mandatory_options_tracking(p):
@@ -383,15 +340,6 @@ def add_track_args(parser):
     parser.add_argument('--rng_seed', default=1337, type=int,
                         help='Random number generator seed [%(default)s].')
 
-def add_monte_carlo_args(parser):
-    parser.add_argument('--mc_oracle_checkpoint', type=str,
-                        help='Path to the oracle checkpoint FILE to load.\n'
-                        'This oracle will be used to evaluate the streamlines.'
-                        '\n It should be able to predict streamlines at \n'
-                        'any length.')
-    parser.add_argument('--gm_mask', type=str,
-                        help='Grey matter mask (.nii.gz).')
-
 def parse_args():
     """ Generate a tractogram from a trained model. """
     parser = argparse.ArgumentParser(
@@ -399,8 +347,6 @@ def parse_args():
         formatter_class=RawTextHelpFormatter)
 
     add_track_args(parser)
-    add_monte_carlo_args(parser)
-
     args = parser.parse_args()
 
     assert_inputs_exist(parser, [args.in_odf, args.in_seed, args.in_mask])

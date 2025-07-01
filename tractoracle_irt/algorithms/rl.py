@@ -92,8 +92,7 @@ class RLAlgorithm(object):
         current_nb_dones = 0
         pbar = tqdm(total=n_streamlines, desc='Val episode',
                     leave=False, disable=not enable_pbar)
-        if hasattr(env, 'rollout_env') and env.rollout_env:
-            env.rollout_env.rollout_stats.reset()
+
         step = 0
         while not np.all(done):
             # Select action according to policy + noise to make tracking
@@ -119,18 +118,7 @@ class RLAlgorithm(object):
             assert current_nb_dones <= n_streamlines
 
             pbar.update(new_nb_dones)
-
-            if hasattr(env, 'rollout_env') and env.rollout_env:
-                stats = env.rollout_env.rollout_stats.get_stats(reduce='mean')
-                # Make sure that each value of the stats is exactly two decimals long
-                # stats = {k: f'{v:.2f}' for k, v in stats.items()}
-                for k, v in stats.items():
-                    if isinstance(v, float) and not v.is_integer():
-                        stats[k] = f'{v:.2f}'
-                stats.update({'step': step})
-                pbar.set_postfix(stats)
-            else:
-                pbar.set_postfix({'step': step})
+            pbar.set_postfix({'step': step})
 
             # Keep track of reward
             if compute_reward:
@@ -143,12 +131,5 @@ class RLAlgorithm(object):
             step += 1
 
         # env.render()
-
-        if hasattr(env.rollout_env, 'utility_tracker') \
-            and env.rollout_env.utility_tracker:
-
-            stats = env.rollout_env.utility_tracker.get_stats()
-            print(prettier_dict(stats, 'Rollout utility stats'))
-            env.rollout_env.utility_tracker.reset()
 
         return running_reward
