@@ -13,6 +13,31 @@ inferno_ver:
   name: "inferno_ver_32pts.ckpt"
   type: "file"
 
+hcp_rbx:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/rbx_based/hcp_rbx_32pts.ckpt"
+  name: "hcp_rbx_32pts.ckpt"
+  type: "file"
+
+hcp_ext:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/extractor_based/hcp_ext_32pts.ckpt"
+  name: "hcp_ext_32pts.ckpt"
+  type: "file"
+
+hcp_ver:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/verifyber_based/hcp_ver_32pts.ckpt"
+  name: "hcp_ver_32pts.ckpt"
+  type: "file"
+
+ismrm_classif:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/tractometer_based/ismrm2015_tra_classif_32pts.ckpt"
+  name: "ismrm2015_tra_classif_32pts.ckpt"
+  type: "file"
+
+ismrm_dense:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/tractometer_based/ismrm2015_tra_dense_32pts.ckpt"
+  name: "ismrm2015_tra_dense_32pts.ckpt"
+  type: "file"
+
 rbx_atlas:
   url: ["https://zenodo.org/records/10103446/files/atlas.zip", "https://zenodo.org/records/10103446/files/config.zip"]
   name: "rbx_atlas"
