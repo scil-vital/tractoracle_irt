@@ -89,3 +89,4 @@ configs/*.yml
 venv/
 .DS_Store
 *.ckpt
+*.zip
