@@ -84,3 +84,6 @@ dipy_segment_*/
 scripts/ismrm/
 configs/*.yml
 .venv/
+.data/
+.nextflow/
+venv/

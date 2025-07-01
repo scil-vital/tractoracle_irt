@@ -1,0 +1,24 @@
+inferno_rbx:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/rbx_based/inferno_rbx_32pts.ckpt"
+  name: "inferno_rbx_32pts.ckpt"
+  type: "file"
+
+inferno_ext:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/extractor_based/inferno_ext_32pts.ckpt"
+  name: "inferno_ext_32pts.ckpt"
+  type: "file"
+
+inferno_ver:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/oracles/verifyber_based/inferno_ver_32pts.ckpt"
+  name: "inferno_ver_32pts.ckpt"
+  type: "file"
+
+rbx_atlas:
+  url: ["https://zenodo.org/records/10103446/files/atlas.zip", "https://zenodo.org/records/10103446/files/config.zip"]
+  name: "rbx_atlas"
+  type: "dir"
+
+extractor_target:
+  url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/misc/JHU_MNI_SS_T1_brain_182x218x182_conv_f.nii.gz"
+  name: "JHU_MNI_SS_T1_brain_182x218x182_conv_f.nii.gz"
+  type: "file"

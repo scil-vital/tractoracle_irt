@@ -17,19 +17,20 @@ from typing import Union
 
 from tractoracle_irt.utils.logging import get_logger
 from tractoracle_irt.utils.utils import get_project_root_dir
+from tractoracle_irt.filterers.nextflow import build_pipeline_command
 
 LOGGER = get_logger(__name__)
 
-DEFAULT_RBX_FLOW = "levje/rbx_flow -r segregation"
-
 # TODO: Add the streamline sampler.
 class RbxFilterer(Filterer):
-        
-    def __init__(self, atlas_directory: str, pipeline_path: str = None):
+
+    def __init__(self, atlas_directory: str, sif_img_path: str = None, pipeline_path: str = "levje/rbx_flow -r segregation"):
         super(RbxFilterer, self).__init__()
 
-        # self.pipeline_path = "scilus/extractor_flow -r dev2023"
-        self.pipeline_path = pipeline_path if pipeline_path is not None else DEFAULT_RBX_FLOW
+        self.pipeline_command = build_pipeline_command(pipeline_path,
+                                                       use_docker=sif_img_path is None,
+                                                       img_path=sif_img_path)
+        
         self.flow_configs = [ str(get_project_root_dir() / "configs/nextflow/rbx.config") ] # TODO
         self.atlas_directory = atlas_directory
         
@@ -37,8 +38,6 @@ class RbxFilterer(Filterer):
             raise ValueError("Atlas directory must be provided.")
         elif not os.path.exists(atlas_directory):
             raise ValueError(f"Atlas directory {atlas_directory} does not exist.")
-
-        self.profiles = ['singularity']
 
     @property
     def ends_up_in_orig_space(self):
@@ -55,15 +54,12 @@ class RbxFilterer(Filterer):
         #       We should have a method within the RLHF class that uses the environment to
         #       register the tractograms since the environment holds either the T1w or the
         #       transformation matrices.
-        #
-        # TODO: Add a check to see if the T1w file is in the in_directory, otherwise raise an error.
         assert os.path.exists(in_directory), f"In directory does not exist: {in_directory}"
         assert os.path.exists(out_dir), f"Output directory does not exist: {out_dir}"
         assert verify_root_structure(in_directory)
         params = {
             "input": in_directory,
             "atlas_directory": self.atlas_directory,
-            # "with-singularity": self.singularity_image,
         }
         subjs_nb_streamlines = self._count_nb_streamlines(in_directory)
         results_dir = self._run_pipeline(params, out_dir)
@@ -76,7 +72,7 @@ class RbxFilterer(Filterer):
     
     def _run_pipeline(self, params, run_path):
         for execution in nextflow.run_and_poll(sleep=30,
-                    pipeline_path=self.pipeline_path,
+                    pipeline_path=self.pipeline_command,
                     run_path=run_path,
                     configs=self.flow_configs,
                     params=params,

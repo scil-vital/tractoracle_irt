@@ -44,16 +44,17 @@ class HParams:
 
     # Extractor parameters
     extractor_validator: bool
+    extractor_sif_img_path: str
     extractor_target: str
 
     # RBX Filterer parameters
     rbx_validator: bool
-    singularity_image: str
+    rbx_sif_img_path: str
     atlas_directory: str
 
     # Verifyber Filterer parameters
     verifyber_validator: bool
-    verifyber_image_path: str
+    verifyber_sif_img_path: str
 
     # Tracking parameters
     npv: int

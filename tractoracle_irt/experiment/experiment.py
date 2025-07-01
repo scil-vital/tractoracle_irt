@@ -563,6 +563,9 @@ def add_extractor_args(parser: ArgumentParser):
     extractor.add_argument('--extractor_validator', action='store_true',
                            help='Run extractor during validation to monitor' +
                            ' how the training is doing w.r.t. ground truth.')
+    extractor.add_argument('--extractor_sif_img_path', type=str, default=None,
+                           help='Path to the Extractor singularity (.sif) image to use for the filterer.'
+                           ' If not provided, the filterer will use the Docker image.')
     extractor.add_argument('--extractor_target', type=str, default=None,
                            help='Target file for the extractor.')
     
@@ -571,20 +574,20 @@ def add_verifyber_args(parser: ArgumentParser):
     verifyber.add_argument('--verifyber_validator', action='store_true',
                            help='Run the Verifyber filterer during validation to monitor '
                            'how the training is doing.')
-    verifyber.add_argument('--verifyber_image_path', type=str, default=None,
-                           help='Path to the Verifyber singularity (.sif) image to use for the filterer.')
-    
+    verifyber.add_argument('--verifyber_sif_img_path', type=str, default=None,
+                           help='Path to the Verifyber singularity (.sif) image to use for the filterer.'
+                           ' If not provided, the filterer will use the Docker image.')
+
 def add_rbx_args(parser: ArgumentParser):
     rbx = parser.add_argument_group('RBX Filterer')
     rbx.add_argument('--rbx_validator', action='store_true',
                      help='Run the RBX filterer during validation to monitor '
                      'how the training is doing.')
-    rbx.add_argument('--singularity_image', type=str, default=None,
-                     help='Singularity image to use for the RBX filterer.')
+    rbx.add_argument('--rbx_sif_img_path', type=str, default=None,
+                     help='Path to the RBX singularity (.sif) image to use for the filterer.'
+                     ' If not provided, the filterer will use the Docker image.')
     rbx.add_argument('--atlas_directory', type=str, default=None,
                      help='Directory containing the atlas for the RBX filterer.')
-    rbx.add_argument('--rbx_pipeline', type=str, default=None,
-                     help='Path to the RBX flow (main.nf) to use for the RBX filterer.')
 
 def add_oracle_args(parser: ArgumentParser):
     oracle = parser.add_argument_group('Oracle')

@@ -47,7 +47,6 @@ LOGGER = get_logger(__name__)
 # parameters, the agent parameters, the oracle parameters and the rlhf parameters.
 @dataclass
 class RlhfHParams(CrossQHParams):
-    pretrain_max_ep: int
     agent_checkpoint: str
 
     oracle_lr: float
@@ -64,14 +63,9 @@ class RlhfHParams(CrossQHParams):
     max_dataset_size: int
     warmup_agent_steps: int
 
-    rbx_pipeline: str = None
     dataset_to_augment: str = None
 
     def __post_init__(self):
-        assert self.pretrain_max_ep is not None \
-            or self.agent_checkpoint is not None, \
-            "Either pretrain_max_ep or agent_checkpoint must be provided for RLHF training."
-        
         if self.agent_checkpoint:
             assert os.path.isfile(
                 self.agent_checkpoint), "Agent checkpoint must be a checkpoint file."
@@ -250,16 +244,7 @@ class RlhfTraining(Training):
         ################################################
         self.agent_trainer.setup_logging()
 
-        if self.hp.pretrain_max_ep is not None \
-            and self.hp.pretrain_max_ep > 0:
-            self.agent_trainer.rl_train(alg,
-                                        env,
-                                        valid_env,
-                                        max_ep=self.pretrain_max_ep,
-                                        starting_ep=0,
-                                        save_model_dir=self.ref_model_dir)
-            current_ep += self.pretrain_max_ep
-        elif self.hp.agent_checkpoint is not None:
+        if self.hp.agent_checkpoint is not None:
             # The agent is already pretrained, just need to fine-tune it.
             LOGGER.info(
                 "Skipping pretraining procedure: loading agent from checkpoint...")
@@ -298,17 +283,17 @@ class RlhfTraining(Training):
             
         if self.hp.extractor_validator:
             self.filterers.append(
-                ExtractorFilterer())
+                ExtractorFilterer(sif_img_path=self.hp.extractor_sif_img_path))
             
             self.extractor_filterer = self.filterers[-1]
 
         if self.hp.verifyber_validator:
             self.filterers.append(
-                VerifyberFilterer(self.hp.verifyber_image_path))
+                VerifyberFilterer(self.hp.verifyber_sif_img_path))
         
         if self.hp.rbx_validator:
             self.filterers.append(
-                RbxFilterer(self.hp.atlas_directory, pipeline_path=self.hp.rbx_pipeline))
+                RbxFilterer(self.hp.atlas_directory, self.hp.rbx_sif_img_path))
 
         if len(self.filterers) < 1:
             raise ValueError("At least one of the filterers must be enabled.")
@@ -700,20 +685,14 @@ def add_rlhf_training_args(parser: argparse.ArgumentParser):
                             help="Minimum number of steps to warm up the agent before starting the training of the oracle")
 
     # Agent training RLHF arguments
-    agent_group = rlhf_group.add_argument_group("Agent Training Arguments")
+    agent_group = parser.add_argument_group("Agent Training Arguments")
     agent_group.add_argument('--agent_train_steps', type=int, required=True,
                              help='Number of steps to fine-tune the agent during RLHF training.')
-
-    agent_init_group = rlhf_group.add_mutually_exclusive_group(required=True)
-    agent_init_group.add_argument('--pretrain_max_ep', type=int,
-                                  help='Number of epochs for pretraining the RL agent.\n'
-                                  'This is done before starting the RLHF pretraining procedure.')
-    agent_checkpoint_group = agent_init_group.add_mutually_exclusive_group()
-    agent_checkpoint_group.add_argument('--agent_checkpoint', type=str,
-                                        help='Path to the agent checkpoint FILE to load.')
+    agent_group.add_argument('--agent_checkpoint', type=str,
+                                  help='Path to the agent checkpoint FILE to load.')
 
     # Oracle training RLHF arguments
-    oracle_group = rlhf_group.add_argument_group("Oracle Training Arguments")
+    oracle_group = parser.add_argument_group("Oracle Training Arguments")
     oracle_group.add_argument('--oracle_lr', type=float,
                               help='Learning rate to use for training the oracle.\n'
                               'If not set, the lr stored in the checkpoint will be used.')

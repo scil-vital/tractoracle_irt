@@ -15,7 +15,6 @@ from dipy.reconst.shm import sh_to_sf_matrix
 from torch.utils.data import DataLoader
 
 from tractoracle_irt.environments.neighborhood_manager import NeighborhoodManager
-from tractoracle_irt.garbage.view_image import display_image
 from tractoracle_irt.utils.logging import get_logger
 from tractoracle_irt.datasets.SubjectDataset import SubjectDataset
 from tractoracle_irt.datasets.utils import (MRIDataVolume,
@@ -951,4 +950,6 @@ class BaseEnv(object):
         """
         Save the FA file with its associated affine to a directory.
         """
+        if self.fa is None:
+            raise ValueError("FA file is not available. Make sure it is provided in the dataset.")
         nib.save(self.fa, os.path.join(out_dir, filename))

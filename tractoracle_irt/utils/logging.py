@@ -1,6 +1,6 @@
 import logging
 
-root_logger = logging.getLogger('TTL')
+root_logger = logging.getLogger('TO')
 
 def add_logging_args(parser):
     parser.add_argument('--log_file', type=str, default=None,

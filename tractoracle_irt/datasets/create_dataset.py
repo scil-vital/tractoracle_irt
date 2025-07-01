@@ -103,12 +103,10 @@ def add_subject_to_hdf5(
     tracking_file = config['tracking']
     seeding_file = config['seeding']
     anat_file = config['anat']
+    fa_file = config['fa']
     gm_file = config['gm'] if 'gm' in config else config['anat']
     transfo_file = config.get('transformation', None)
     deformation_file = config.get('deformation', None)
-
-    print("transfo_file: ", transfo_file)
-    print("deformation file: ", deformation_file)
 
     if (transfo_file is not None and deformation_file is None) \
         or (transfo_file is None and deformation_file is not None):
@@ -119,7 +117,7 @@ def add_subject_to_hdf5(
 
     # Process subject's data
     process_subject(hdf_subject, input_files, peaks_file, tracking_file,
-                    seeding_file, anat_file, gm_file, transfo_file, deformation_file)
+                    seeding_file, anat_file, fa_file, gm_file, transfo_file, deformation_file)
 
 
 def process_subject(
@@ -129,6 +127,7 @@ def process_subject(
     tracking: str,
     seeding: str,
     anat: str,
+    fa: str,
     gm: str,
     in_transfo: str = None,
     in_deformation: str = None,
@@ -182,6 +181,9 @@ def process_subject(
 
     anat_image = nib.load(anat)
     add_volume_to_hdf5(hdf_subject, anat_image, 'anat_volume')
+
+    fa_image = nib.load(fa)
+    add_volume_to_hdf5(hdf_subject, fa_image, 'fa_volume')
 
     if gm is not None:
         gm_mask_image = nib.load(gm)

@@ -4,23 +4,30 @@ import os
 from pathlib import Path
 
 from tractoracle_irt.filterers.verifyber.config_generator import VerifyberConfigGenerator
-from tractoracle_irt.filterers.verifyber.apptainer_runner import VerifyberApptainerRunner
+from tractoracle_irt.filterers.verifyber.runners import (VerifyberApptainerRunner, VerifyberDockerRunner)
 from tractoracle_irt.filterers.verifyber.post_processor import VerifyberPostProcessor
 from tractoracle_irt.utils.logging import get_logger
 
 LOGGER = get_logger(__name__)
 
+DOCKER_IMAGE = "levje/verifyber:latest"
+
 # TODO: Add the streamline sampler.
 class VerifyberFilterer(Filterer):
-        
-    def __init__(self, image_path):
+    def __init__(self, sif_img_path: str = None):
         super(VerifyberFilterer, self).__init__()
 
         self.config_generator = VerifyberConfigGenerator(
             t1_mandatory=True, fa_mandatory=False, return_trk=False,
             model="sdec_extractor")
-        self.apptainer_runner = VerifyberApptainerRunner(
-            apptainer_image_path=image_path, use_slurm_tmpdir=True)
+        
+        if sif_img_path is not None:
+            self.runner = VerifyberApptainerRunner(
+                sif_img_path=sif_img_path, use_slurm_tmpdir=True)
+        else:
+            self.runner = VerifyberDockerRunner(docker_image=DOCKER_IMAGE)
+
+
         self.post_processor = VerifyberPostProcessor()
 
     @property

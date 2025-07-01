@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from typing import Union
 
+from tractoracle_irt.filterers.nextflow import build_pipeline_command
 from tractoracle_irt.utils.logging import get_logger
 from tractoracle_irt.utils.utils import get_project_root_dir, is_running_on_slurm
 
@@ -22,13 +23,12 @@ LOGGER = get_logger(__name__)
 # TODO: Add the streamline sampler.
 class ExtractorFilterer(Filterer):
         
-    def __init__(self, end_space="mni", keep_intermediate_steps=True, quick_registration=True, singularity=True):
+    def __init__(self, end_space="mni", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/extractor_flow -r dev2023"):
         super(ExtractorFilterer, self).__init__()
 
-        self.pipeline_path = "levje/extractor_flow"
+        self.pipeline_command = build_pipeline_command(pipeline_path, use_docker=sif_img_path is None, img_path=sif_img_path)
         self.flow_configs = [ str(get_project_root_dir() / "configs/nextflow/extractor.config") ] # TODO
         
-        self.profiles = self._select_nextflow_profiles(singularity)
         self.keep_intermediate_steps = keep_intermediate_steps
         self.quick_registration = quick_registration
         self.end_space = end_space
@@ -42,14 +42,6 @@ class ExtractorFilterer(Filterer):
     @property
     def ends_up_in_orig_space(self):
         return self.end_space == "orig"
-
-    def _select_nextflow_profiles(self, singularity: bool):
-        profiles = []
-        if singularity:
-            profiles.append("singularity" if singularity else "docker")
-        if is_running_on_slurm():
-            profiles.append("singularity_slurm" if singularity else "docker_slurm")
-        return profiles
 
     def _filter(self, tractogram, out_dir, scored_extension="trk"):
         pass
@@ -82,7 +74,7 @@ class ExtractorFilterer(Filterer):
     
     def _run_pipeline(self, params, run_path):
         for execution in nextflow.run_and_poll(sleep=5,
-                    pipeline_path=self.pipeline_path,
+                    pipeline_path=self.pipeline_command,
                     run_path=run_path,
                     configs=self.flow_configs,
                     params=params,

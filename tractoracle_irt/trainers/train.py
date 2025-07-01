@@ -33,7 +33,7 @@ from tractoracle_irt.utils.utils import TTLProfiler
 from tractoracle_irt.algorithms.shared.hyperparameters import HParams
 
 
-class TractOracleTraining(Experiment):
+class Training(Experiment):
     """
     Main RL tracking experiment
     """
