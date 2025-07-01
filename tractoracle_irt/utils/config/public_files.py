@@ -82,8 +82,15 @@ PUBLIC_FILES = load_public_files()
 check_duplicate_files(PUBLIC_FILES)
 #############################################
 
+def is_public_file(path: str) -> bool:
+    """
+    Check if the given path is a public file.
+    A public file is defined as a file that starts with "public://".
+    """
+    return path.startswith("public://")
+
 def download_if_public_file(path: str) -> str:
-    if path.startswith("public://"):
+    if is_public_file(path):
         # Remove the "public://" prefix
         path = path[9:]
         public_file_data = PUBLIC_FILES.get(path, None)

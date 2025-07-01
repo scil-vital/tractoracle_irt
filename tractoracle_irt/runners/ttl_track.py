@@ -25,7 +25,7 @@ from tractoracle_irt.algorithms.dro_q import DroQ
 from tractoracle_irt.datasets.utils import MRIDataVolume
 from tractoracle_irt.experiment.experiment import Experiment
 from tractoracle_irt.tracking.tracker import Tracker
-from tractoracle_irt.utils.config.public_files import download_if_public_file
+from tractoracle_irt.utils.config.public_files import download_if_public_file, is_public_file
 from tractoracle_irt.utils.torch_utils import get_device
 from tractoracle_irt.utils.logging import get_logger
 from tractoracle_irt.utils.utils import prettier_dict
@@ -143,7 +143,14 @@ class Track(Experiment):
                 hparams = json.load(f)
             return hparams
         
+        was_public_file = is_public_file(self.hp.agent_checkpoint)
         self.hp.agent_checkpoint = download_if_public_file(self.hp.agent_checkpoint)
+        if was_public_file:
+            # The previous method returns the path of the directory.
+            # We need to get the checkpoint file from there.
+            self.hp.agent_checkpoint = os.path.join(
+                self.hp.agent_checkpoint, 'last_model_state.ckpt')
+
         checkpoint_dir = os.path.dirname(self.hp.agent_checkpoint)
         self.hparams = load_hyperparameters(os.path.join(
             checkpoint_dir, 'hyperparameters.json'))
@@ -235,7 +242,7 @@ class Track(Experiment):
         filetype = detect_format(self.hp.out_tractogram)
         
         stopping_stats = {} # Stopping stats dict that will get populated when tracking is done.
-        tractogram = tracker.track(env, filetype, stopping_stats=stopping_stats)
+        tractogram = tracker.track(env, filetype)
 
         reference = get_reference_info(self.hp.reference_file)
         header = create_tractogram_header(filetype, *reference)
@@ -293,12 +300,9 @@ def add_track_args(parser):
     add_out_options(parser)
     agent_group = parser.add_argument_group('Tracking agent options')
     agent_checkpoint_group = agent_group.add_mutually_exclusive_group(required=True)
-    agent_checkpoint_group.add_argument('--agent_checkpoint_dir', type=str,
-                                        help='Path to the folder containing .pth files.\n'
-                                        'This avoids retraining the agent from scratch \n'
-                                        'and allows to directly fine-tune it.')
     agent_checkpoint_group.add_argument('--agent_checkpoint', type=str,
-                                        help='Path to the agent checkpoint FILE to load.')
+                                        help='Path to the agent checkpoint FILE to load. There must be a hyperparameters.json file in the same directory.\n'
+                                        'If the path is a public file, it will be downloaded automatically.')
 
     agent_group.add_argument('--n_actor', type=int, default=10000, metavar='N',
                              help='Number of streamlines to track simultaneous'

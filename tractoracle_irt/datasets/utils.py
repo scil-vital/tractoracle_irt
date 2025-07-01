@@ -167,7 +167,7 @@ def set_sh_order_basis(
 
     """
 
-    sphere = get_sphere(sphere_name)
+    sphere = get_sphere(name=sphere_name)
 
     n_coefs = sh.shape[-1]
     sh_order, full_basis = get_sh_order_and_fullness(n_coefs)

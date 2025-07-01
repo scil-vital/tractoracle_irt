@@ -543,7 +543,7 @@ class BaseEnv(object):
                 peak_dirs = np.zeros((odf_shape_3d + (npeaks, 3)))
                 peak_values = np.zeros((odf_shape_3d + (npeaks, )))
 
-                sphere = HemiSphere.from_sphere(get_sphere("repulsion724")
+                sphere = HemiSphere.from_sphere(get_sphere(name="repulsion724")
                                                 ).subdivide(0)
 
                 order = find_order_from_nb_coeff(data)
@@ -553,7 +553,7 @@ class BaseEnv(object):
                 LOGGER.debug("sh_basis: {}".format(sh_basis))
                 LOGGER.debug("target_sh_order: {}".format(target_sh_order))
 
-                b_matrix, _ = sh_to_sf_matrix(sphere, order, "descoteaux07", legacy=is_sh_basis_legacy)
+                b_matrix, _ = sh_to_sf_matrix(sphere=sphere, sh_order_max=order, basis_type="descoteaux07", legacy=is_sh_basis_legacy)
                 for idx in np.argwhere(np.sum(data, axis=-1)):
                     idx = tuple(idx)
                     directions, values, indices = get_maximas(data[idx],
