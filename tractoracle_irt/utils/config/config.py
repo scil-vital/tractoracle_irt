@@ -1,17 +1,12 @@
 import yaml
 import os
-import subprocess
 from datetime import datetime
-import argparse
-from pathlib import Path
-import logging
 
 from typing import Union
-from copy import deepcopy
 
 from tractoracle_irt.utils.utils import get_project_root_dir
 from tractoracle_irt.utils.config.misc import check_file_exists
-from tractoracle_irt.utils.config.public_files import PUBLIC_FILES, download_file_data
+from tractoracle_irt.utils.config.public_files import download_if_public_file
 
 DEFAULT_SOURCEDIR = os.path.join(get_project_root_dir())
 
@@ -158,13 +153,7 @@ class Config:
             # 0. If the path refers to a public file, we download it
             # and update the path accordingly.
             if isinstance(path, str):
-                if path.startswith("public://"):
-                    # Remove the "public://" prefix
-                    path = path[9:]
-                    public_file_data = PUBLIC_FILES.get(path, None)
-                    if public_file_data is not None:
-                        download_file_data(public_file_data)
-                        path = public_file_data.path # Update the path to the downloaded file
+                path = download_if_public_file(path)
 
             # 2. Substitute the variables in the path if there are any
             path = substitute_vars(path)

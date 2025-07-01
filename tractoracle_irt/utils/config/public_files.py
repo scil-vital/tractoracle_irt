@@ -82,6 +82,16 @@ PUBLIC_FILES = load_public_files()
 check_duplicate_files(PUBLIC_FILES)
 #############################################
 
+def download_if_public_file(path: str) -> str:
+    if path.startswith("public://"):
+        # Remove the "public://" prefix
+        path = path[9:]
+        public_file_data = PUBLIC_FILES.get(path, None)
+        if public_file_data is not None:
+            download_file_data(public_file_data)
+            path = public_file_data.path # Update the path to the downloaded file
+    return path
+
 def download_file_data(file_data: FileData):
     if not isinstance(file_data, FileData):
         raise TypeError(f"Expected FileData, got {type(file_data)}")

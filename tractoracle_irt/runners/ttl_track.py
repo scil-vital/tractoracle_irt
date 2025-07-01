@@ -23,9 +23,9 @@ from tractoracle_irt.algorithms.sac_auto import SACAuto
 from tractoracle_irt.algorithms.cross_q import CrossQ
 from tractoracle_irt.algorithms.dro_q import DroQ
 from tractoracle_irt.datasets.utils import MRIDataVolume
-
 from tractoracle_irt.experiment.experiment import Experiment
 from tractoracle_irt.tracking.tracker import Tracker
+from tractoracle_irt.utils.config.public_files import download_if_public_file
 from tractoracle_irt.utils.torch_utils import get_device
 from tractoracle_irt.utils.logging import get_logger
 from tractoracle_irt.utils.utils import prettier_dict
@@ -143,6 +143,7 @@ class Track(Experiment):
                 hparams = json.load(f)
             return hparams
         
+        self.hp.agent_checkpoint = download_if_public_file(self.hp.agent_checkpoint)
         checkpoint_dir = os.path.dirname(self.hp.agent_checkpoint)
         self.hparams = load_hyperparameters(os.path.join(
             checkpoint_dir, 'hyperparameters.json'))
