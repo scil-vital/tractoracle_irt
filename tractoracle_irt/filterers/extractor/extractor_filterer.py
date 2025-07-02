@@ -77,8 +77,7 @@ class ExtractorFilterer(Filterer):
                     pipeline_path=self.pipeline_command,
                     run_path=run_path,
                     configs=self.flow_configs,
-                    params=params,
-                    profiles=self.profiles):
+                    params=params):
             LOGGER.info("Running Extractor pipeline. ")
             LOGGER.info(execution.stdout)
         
