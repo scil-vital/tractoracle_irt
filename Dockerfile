@@ -36,5 +36,5 @@ RUN cd tractoracle_irt \
         sac_irt_hcp \
         crossq_irt_hcp
 
-# ENTRYPOINT [ "source" ]
+ENTRYPOINT [ "uv", "run", "tractoracle_irt/runners/ttl_track.py"]
 
