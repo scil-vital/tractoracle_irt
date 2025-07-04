@@ -30,13 +30,13 @@ def is_torch_type(dtype):
 global CPU_WARNING_WAS_PRINTED
 CPU_WARNING_WAS_PRINTED = False
 def get_device():
+    global CPU_WARNING_WAS_PRINTED
     if torch.cuda.is_available():
         return torch.device("cuda")
     elif torch.backends.mps.is_available():
         return torch.device("mps")
     else:
         if not CPU_WARNING_WAS_PRINTED:
-            global CPU_WARNING_WAS_PRINTED
             CPU_WARNING_WAS_PRINTED = True
             LOGGER.warning("No GPU or MPS device found, using CPU."
                            " Make sure that you have cuda properly installed."
