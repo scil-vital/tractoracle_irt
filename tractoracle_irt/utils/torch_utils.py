@@ -27,6 +27,7 @@ def is_np_type(dtype):
 def is_torch_type(dtype):
     return dtype in torch_to_np
 
+global CPU_WARNING_WAS_PRINTED
 CPU_WARNING_WAS_PRINTED = False
 def get_device():
     if torch.cuda.is_available():

@@ -4,7 +4,8 @@ WORKDIR /app
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install curl git neovim zip unzip build-essential python3-dev -y
+    apt-get install curl git neovim zip unzip build-essential python3-dev -y \
+    && apt-get install -y libxrender1 libgl1 libgl1-mesa-glx
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -36,5 +37,6 @@ RUN cd tractoracle_irt \
         sac_irt_hcp \
         crossq_irt_hcp
 
-ENTRYPOINT [ "cd", "/app/tractoracle_irt", "&&", "uv", "run", "tractoracle_irt/runners/ttl_track.py"]
+WORKDIR /app/tractoracle_irt/
+ENTRYPOINT [ "uv", "run", "tractoracle_irt/runners/ttl_track.py"]
 
