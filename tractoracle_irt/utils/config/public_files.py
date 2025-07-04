@@ -4,6 +4,7 @@ import requests
 from dataclasses import dataclass
 from tqdm import tqdm
 import zipfile
+from pathlib import Path
 
 from typing import Union
 from tempfile import TemporaryDirectory
@@ -16,7 +17,7 @@ LOGGER = get_logger(__name__)
 
 CONFIG_FILE = get_project_root_dir() / "configs/defaults/public_files.yml"
 OUTPUT_DIR = get_project_root_dir() / ".data" / "public"
-
+TOUCH_FILENAME = ".downloaded"
 class FileData:
     class FileDataType:
         FILE = "file"
@@ -117,6 +118,10 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
     else:
         path_dir = os.path.dirname(path)
 
+    if os.path.exists(os.path.join(path_dir, TOUCH_FILENAME)):
+        LOGGER.debug(f"File {path} already downloaded. Skipping download.")
+        return True
+
     if skip_if_exists and os.path.exists(path):
         LOGGER.debug(f"File {path} already exists. Skipping download.")
         return True
@@ -145,6 +150,10 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
 
     if path.endswith('.zip'):
         uncompress_files_into_directory(path, output_dir=path_dir, remove_archive=remove_archive)
+
+    # Touch a file to signal that the download is created
+    touch_file = Path(path_dir) / TOUCH_FILENAME
+    touch_file.touch()
 
     return True
 
