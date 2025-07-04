@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install curl git neovim zip unzip -y
+    apt-get install curl git neovim zip unzip build-essential python3-dev -y
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
