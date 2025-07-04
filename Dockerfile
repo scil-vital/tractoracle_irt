@@ -30,7 +30,7 @@ RUN cd tractoracle_irt \
 
 # Download required checkpoint files
 RUN cd tractoracle_irt \
-    && python scripts/download_public_files.py --remove_zip \
+    && uv run scripts/download_public_files.py --remove_zip \
         sac_irt_inferno \
         crossq_irt_inferno \
         sac_irt_hcp \
