@@ -71,6 +71,8 @@ docker run -v ... -t mrzarfir/tractoracle-irt-cpu:latest
 
 ## Training
 
+In order to train any model, you have to correctly install the project locally as no docker image is provided to train. Once you have correctly installed the project, please continue to the next subsections to be able to train your first tracking agent.
+
 ### Choosing what you want to train.
 ### Training configuration
 

@@ -99,15 +99,15 @@ def download_if_public_file(path: str) -> str:
             path = public_file_data.path # Update the path to the downloaded file
     return path
 
-def download_file_data(file_data: FileData):
+def download_file_data(file_data: FileData, remove_archive=False):
     if not isinstance(file_data, FileData):
         raise TypeError(f"Expected FileData, got {type(file_data)}")
     
     for url in file_data.urls:
-        download_file(url, file_data.path, except_on_error=True)
+        download_file(url, file_data.path, except_on_error=True, remove_archive=remove_archive)
     return True
 
-def download_file(url, path, skip_if_exists=True, except_on_error=True):
+def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_archive=False):
     # If path is a directory, add the filename from the URL
     if os.path.isdir(path):
         path_dir = path
@@ -144,11 +144,11 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True):
         return False
 
     if path.endswith('.zip'):
-        uncompress_files_into_directory(path, output_dir=path_dir)
+        uncompress_files_into_directory(path, output_dir=path_dir, remove_archive=remove_archive)
 
     return True
 
-def uncompress_files_into_directory(*zip_files, output_dir=OUTPUT_DIR):
+def uncompress_files_into_directory(*zip_files, output_dir=OUTPUT_DIR, remove_archive=False):
     os.makedirs(output_dir, exist_ok=True)
     for zip_file in zip_files:
         if not zip_file.endswith('.zip'):
@@ -160,4 +160,7 @@ def uncompress_files_into_directory(*zip_files, output_dir=OUTPUT_DIR):
         
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(output_dir)
+        if remove_archive:
+            os.remove(zip_path)
+            LOGGER.info(f"Removed archive {zip_path}")
     return str(output_dir)
