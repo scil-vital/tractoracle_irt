@@ -40,7 +40,7 @@ uv pip install -e .
 
 ### Install external dependencies
 - [**Nextflow**](https://www.nextflow.io/docs/latest/install.html): We recommend installing version 21.10.3 (or a similar version), as most of the flows we use (i.e. rbx_flow, extractor_flow) do not support Nextflow's DSL2. Nextflow is required to run [RecobundlesX](https://github.com/levje/rbx_flow) and [extractor_flow](https://github.com/scilus/extractor_flow), which are used during the IRT procedure.
-- [**Docker**](https://www.docker.com/get-started/): docker is required to run IRT training with either is required to run [RecobundlesX](https://github.com/levje/rbx_flow), [extractor_flow](https://github.com/scilus/extractor_flow) and Verifyber.
+- [**Docker**](https://www.docker.com/get-started/): docker is required to run IRT training when running [RecobundlesX](https://github.com/levje/rbx_flow), [extractor_flow](https://github.com/scilus/extractor_flow) and Verifyber.
 - [**Apptainer**](https://apptainer.org/docs/admin/main/installation.html): Although we prefer the use of docker to spawn containers, we also support Apptainer/Singularity images which requires the installation of Apptainer.
 
 ## Tracking
@@ -62,12 +62,21 @@ Prerequisites:
 
 Spin up a container and watch the magic happen:
 ``` bash
-# GPU tracking (requires nvidia-container-toolkit and CUDA)
-docker run -v ... -t mrzarfir/tractoracle-irt-gpu:latest
-
-# CPU tracking (much slower)
-docker run -v ... -t mrzarfir/tractoracle-irt-cpu:latest
+docker run [--gpus all] \
+    -v <your_output_directory>:/output\
+    -v <your_input_fodf>:/input/in_odf.nii.gz
+    -v <your_interface_mask>:/input/in_seed.nii.gz
+    -v <your_tracking_mask>:/input/in_mask.nii.gz
+    -t mrzarfir/tractoracle-irt:latest \
+    <out_tractogram_name.trk>
 ```
+
+For your convenience, you can run `bash track_docker_cpu.sh` or `bash track_docker_gpu.sh` which take care of running that command for you with additional guidance. 
+For your convenience, the `track_docker.sh` script is provided which guardrails the inputs and outputs. You can use this script the following way:
+``` bash
+bash track_docker {cpu, gpu} <input_odf>.nii.gz <input_interface>.nii.gz <input_mask>.nii.gz <output_tractogram_name> <output_directory>
+```
+
 
 ## Training
 

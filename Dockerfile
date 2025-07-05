@@ -30,13 +30,18 @@ RUN cd tractoracle_irt \
     && uv pip install -e .
 
 # Download required checkpoint files
-RUN cd tractoracle_irt \
-    && uv run scripts/download_public_files.py --remove_zip \
-        sac_irt_inferno \
-        crossq_irt_inferno \
-        sac_irt_hcp \
-        crossq_irt_hcp
+# RUN cd tractoracle_irt \
+#     && uv run scripts/download_public_files.py --remove_zip \
+#         sac_irt_inferno \
+#         crossq_irt_inferno \
+#         sac_irt_hcp \
+#         crossq_irt_hcp
+
+# Setup the files to be used by the entrypoint
+RUN mkdir /input \
+    && mkdir /output
 
 WORKDIR /app/tractoracle_irt/
-ENTRYPOINT [ "uv", "run", "tractoracle_irt/runners/ttl_track.py"]
+
+ENTRYPOINT [ "uv", "run", "tractoracle_irt/runners/ttl_track.py", "${ALGO}", "/input/in_odf.nii.gz", "/input/in_seed.nii.gz", "/input/in_mask.nii.gz"]
 
