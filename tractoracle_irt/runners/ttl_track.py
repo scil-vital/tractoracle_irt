@@ -310,8 +310,7 @@ def add_track_args(parser):
                    'The algorithm should be already specified in the agent checkpoint hyperparameters, but this option will override it.')
     add_out_options(parser)
     agent_group = parser.add_argument_group('Tracking agent options')
-    agent_checkpoint_group = agent_group.add_mutually_exclusive_group(required=True)
-    agent_checkpoint_group.add_argument('--agent_checkpoint', type=str, required=True, metavar='FILE',
+    agent_group.add_argument('--agent_checkpoint', type=str, required=True, metavar='FILE',
                                         help='Path to the agent checkpoint FILE to load. There must be a hyperparameters.json file in the same directory.\n'
                                         'If the path is a public file, it will be downloaded automatically.')
 
