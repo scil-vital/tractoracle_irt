@@ -95,3 +95,4 @@ slurm_scripts/
 tests/
 Dockerfile
 .gitignore
+.git/
