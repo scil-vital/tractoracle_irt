@@ -43,6 +43,5 @@ RUN mkdir /input \
 
 WORKDIR /app/tractoracle_irt/
 
-
-ENTRYPOINT [ "uv", "run", "tractoracle_irt/runners/ttl_track.py", "/input/in_odf.nii.gz", "/input/in_seed.nii.gz", "/input/in_mask.nii.gz"]
-CMD [ "/output/tractogram.trk", "--agent_checkpoint", "public://sac_irt_inferno" ]
+ENV TRACTORACLE_IRT_OUTPUT_TRACTOGRAM="/output/tractogram.trk"
+ENTRYPOINT [ "uv", "run", "tractoracle_irt/runners/ttl_track.py", "/input/in_odf.nii.gz", "/input/in_seed.nii.gz", "/input/in_mask.nii.gz" ]

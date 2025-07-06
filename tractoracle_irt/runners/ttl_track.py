@@ -276,7 +276,8 @@ def add_mandatory_options_tracking(p):
     p.add_argument('in_mask',
                    help='Tracking mask (.nii.gz).\n'
                         'Tracking will stop outside this mask.')
-    p.add_argument('out_tractogram',
+    p.add_argument('--out_tractogram', type=str, metavar='FILE',
+                   default=os.environ.get('TRACTORACLE_IRT_OUTPUT_TRACTOGRAM', 'tractogram.trk'),
                    help='Tractogram output file (must be .trk or .tck).')
     p.add_argument('--input_wm', action='store_true',
                    help='If set, append the WM mask to the input signal. The '
@@ -310,7 +311,7 @@ def add_track_args(parser):
                    'The algorithm should be already specified in the agent checkpoint hyperparameters, but this option will override it.')
     add_out_options(parser)
     agent_group = parser.add_argument_group('Tracking agent options')
-    agent_group.add_argument('--agent_checkpoint', type=str, required=True, metavar='FILE',
+    agent_group.add_argument('--agent_checkpoint', type=str, default="public://sac_irt_inferno", metavar='FILE',
                                         help='Path to the agent checkpoint FILE to load. There must be a hyperparameters.json file in the same directory.\n'
                                         'If the path is a public file, it will be downloaded automatically.')
 

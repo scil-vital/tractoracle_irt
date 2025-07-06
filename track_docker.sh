@@ -10,19 +10,18 @@ fi
 # Remove the first argument from the list of arguments
 # in_odf should be the first argument
 shift
-
+    
 # Check if the correct number of arguments is provided
-if [ "$#" -ne 6 ]; then
+if [ "$#" -ne 5 ]; then
     echo "Usage: $0 <gpu|cpu> <input_odf> <input_interface> <input_mask> <output_tractogram> <output_directory>"
     exit 1
 fi
 
-algo=$2
-in_odf=$3
-in_interface=$4
-in_mask=$5
-out_tractogram=$6
-out_dir=$7
+in_odf=$2
+in_interface=$3
+in_mask=$4
+out_tractogram=$5
+out_dir=$6
 
 # Check if the algorithm is valid
 if [[ "$algo" != "SACAuto" && "$algo" != "CrossQ" && "$algo" != "DroQ" ]]; then
@@ -62,7 +61,6 @@ fi
 echo "=========================="
 echo "Running Tractoracle IRT in Docker"
 echo "=========================="
-echo "Algorithm: $algo"
 echo "Input ODF: $in_odf"
 echo "Input Interface: $in_interface"
 echo "Input Mask: $in_mask"
@@ -70,12 +68,11 @@ echo "Output Tractogram: $out_dir/$out_tractogram"
 echo "=========================="
 
 docker run $gpu_flag \
-    -e ALGO="$algo" \
     -v $out_dir:/output \
     -v $in_odf:/input/in_odf.nii.gz \
     -v $in_interface:/input/in_seed.nii.gz \
     -v $in_mask:/input/in_mask.nii.gz \
     -t mrzarfir/tractoracle-irt:latest \
-    /output/$out_tractogram
+    --out_tractogram /output/$out_tractogram
 
 echo "=========================="
