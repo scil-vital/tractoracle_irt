@@ -34,7 +34,6 @@ LOGGER = get_logger(__name__)
 
 @dataclass
 class TrackConfig:
-    algorithm: str
     in_odf: str
     in_mask: str
     in_seed: str
@@ -51,6 +50,7 @@ class TrackConfig:
     agent_checkpoint: str
     rng_seed: int
 
+    algorithm: str = None
     fa_map_file: str = None # Optional
     compress: float = 0.0
 
@@ -93,8 +93,14 @@ class TrackConfig:
             if hasattr(self, key):
                 if overwrite:
                     setattr(self, key, value)
+                elif key == 'algorithm':
+                    # Special case for algorithm, we want to overwrite it
+                    # only if its value if None.
+                    if getattr(self, key) is None:
+                        setattr(self, key, value)
             else:
                 setattr(self, key, value)
+
 
 class Track(Experiment):
     """ TractOracleIRT testing script. Should work on any model trained with a
@@ -203,6 +209,7 @@ class Track(Experiment):
         # Load agent
         algs = {'SACAuto': SACAuto, 'CrossQ': CrossQ, 'DroQ': DroQ}
 
+        verify_algorithm_specified(self.hp)
         rl_alg = algs[self.hp.algorithm]
         print('Tracking with {} agent.'.format(self.hp.algorithm))
         # The RL training algorithm
@@ -241,7 +248,6 @@ class Track(Experiment):
         
         filetype = detect_format(self.hp.out_tractogram)
         
-        stopping_stats = {} # Stopping stats dict that will get populated when tracking is done.
         tractogram = tracker.track(env, filetype)
 
         reference = get_reference_info(self.hp.reference_file)
@@ -249,12 +255,14 @@ class Track(Experiment):
 
         # Use generator to save the streamlines on-the-fly
         nib.streamlines.save(tractogram, self.hp.out_tractogram, header=header)
-        print(prettier_dict(stopping_stats, title='Stopping stats'))
 
+def verify_algorithm_specified(config):
+    # Make sure that the algorithm field is not None.
+    if config.algorithm is None:
+        raise ValueError("The 'algorithm' field in the hyperparameters must be specified. If not "
+                         " it must be set to 'SACAuto', 'CrossQ' or 'DroQ' using the --algorithm argument.")
 
 def add_mandatory_options_tracking(p):
-    p.add_argument('algorithm', choices=['SACAuto', 'CrossQ', 'DroQ'],
-                     help='The algorithm to use for tracking.')
     p.add_argument('in_odf',
                    help='File containing the orientation diffusion function \n'
                         'as spherical harmonics file (.nii.gz). Ex: ODF or '
@@ -266,7 +274,8 @@ def add_mandatory_options_tracking(p):
     p.add_argument('in_mask',
                    help='Tracking mask (.nii.gz).\n'
                         'Tracking will stop outside this mask.')
-    p.add_argument('out_tractogram',
+    p.add_argument('--out_tractogram', type=str, metavar='FILE',
+                   default=os.environ.get('TRACTORACLE_IRT_OUTPUT_TRACTOGRAM', 'tractogram.trk'),
                    help='Tractogram output file (must be .trk or .tck).')
     p.add_argument('--input_wm', action='store_true',
                    help='If set, append the WM mask to the input signal. The '
@@ -296,11 +305,11 @@ def add_track_args(parser):
 
     basis_group = parser.add_argument_group('Basis options')
     add_sh_basis_args(basis_group)
-    
+    parser.add_argument('--algorithm', choices=['SACAuto', 'CrossQ', 'DroQ'], help='The algorithm to use for tracking.\n'
+                   'The algorithm should be already specified in the agent checkpoint hyperparameters, but this option will override it.')
     add_out_options(parser)
     agent_group = parser.add_argument_group('Tracking agent options')
-    agent_checkpoint_group = agent_group.add_mutually_exclusive_group(required=True)
-    agent_checkpoint_group.add_argument('--agent_checkpoint', type=str,
+    agent_group.add_argument('--agent_checkpoint', type=str, default="public://sac_irt_inferno", metavar='FILE',
                                         help='Path to the agent checkpoint FILE to load. There must be a hyperparameters.json file in the same directory.\n'
                                         'If the path is a public file, it will be downloaded automatically.')
 

@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass, field, fields
 
 @dataclass
@@ -80,7 +79,11 @@ class HParams:
     backup_dir: str
 
     def __post_init__(self):
-        pass
+        for field in fields(self):
+            # Ensure that all dataclass fields show up in vars
+            # src: https://stackoverflow.com/questions/70453792/dataclass-attributes-with-init-false-do-not-show-in-vars
+            if field.name not in vars(self):
+                setattr(self, field.name, getattr(self, field.name))
 
     @classmethod
     def from_dict(cls, config: dict, filter_extra_keys=True):
