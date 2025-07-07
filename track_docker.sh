@@ -10,24 +10,18 @@ fi
 # Remove the first argument from the list of arguments
 # in_odf should be the first argument
 shift
-    
+
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 5 ]; then
     echo "Usage: $0 <gpu|cpu> <input_odf> <input_interface> <input_mask> <output_tractogram> <output_directory>"
     exit 1
 fi
 
-in_odf=$2
-in_interface=$3
-in_mask=$4
+in_odf=$1
+in_interface=$2
+in_mask=$3
+out_dir=$4
 out_tractogram=$5
-out_dir=$6
-
-# Check if the algorithm is valid
-if [[ "$algo" != "SACAuto" && "$algo" != "CrossQ" && "$algo" != "DroQ" ]]; then
-    echo "Error: Invalid algorithm '$algo'. Valid options are: SACAuto, CrossQ, DroQ."
-    exit 1
-fi
 
 # Check if the input files exist
 if [ ! -f "$in_odf" ]; then
@@ -57,6 +51,12 @@ if [[ "$out_tractogram" != *.trk && "$out_tractogram" != *.tck ]]; then
     echo "Error: Output tractogram name must end with .trk or .tck"
     exit 1
 fi
+
+# Make sure all the input files are absolute paths
+in_odf=$(realpath "$in_odf")
+in_interface=$(realpath "$in_interface")
+in_mask=$(realpath "$in_mask")
+out_dir=$(realpath "$out_dir")
 
 echo "=========================="
 echo "Running Tractoracle IRT in Docker"

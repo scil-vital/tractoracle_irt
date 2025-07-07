@@ -248,7 +248,6 @@ class Track(Experiment):
         
         filetype = detect_format(self.hp.out_tractogram)
         
-        stopping_stats = {} # Stopping stats dict that will get populated when tracking is done.
         tractogram = tracker.track(env, filetype)
 
         reference = get_reference_info(self.hp.reference_file)
@@ -256,7 +255,6 @@ class Track(Experiment):
 
         # Use generator to save the streamlines on-the-fly
         nib.streamlines.save(tractogram, self.hp.out_tractogram, header=header)
-        print(prettier_dict(stopping_stats, title='Stopping stats'))
 
 def verify_algorithm_specified(config):
     # Make sure that the algorithm field is not None.
