@@ -29,6 +29,7 @@ files are the following:
 - Tracking mask
 - Seeding image
 - Anatomical image
+- Fractional anisotropy (FA) image
 - Gray matter mask
 
 By default, the script will assume that your dataset is organized in a
@@ -47,6 +48,8 @@ example_directory/
 │   │   │   └── 100610__mask_wm.nii.gz
 │   │   ├── maps/
 │   │   │   └── 100610__interface.nii.gz
+│   │   ├── dti/
+│   │   │   └── 100610__fa.nii.gz
 │   │   └── anat/
 │   │       └── 100610_T1.nii.gz
 │   └── 100711
@@ -62,6 +65,8 @@ example_directory/
 │   │   │   └── 136126__mask_wm.nii.gz
 │   │   ├── maps/
 │   │   │   └── 136126__interface.nii.gz
+│   │   ├── dti/
+│   │   │   └── 136126__fa.nii.gz
 │   │   └── anat/
 │   │       └── 136126_T1.nii.gz
 │   └── 136227
@@ -77,6 +82,8 @@ example_directory/
     │   │   └── 139435__mask_wm.nii.gz
     │   ├── maps/
     │   │   └── 139435__interface.nii.gz
+    │   ├── dti/
+    │   │   └── 139435__fa.nii.gz
     │   └── anat/
     │       └── 139435_T1.nii.gz
     └── 140117
@@ -93,6 +100,7 @@ The script will generate a JSON file with the following structure:
             "peaks": "example_directory/trainset/100610/fodfs/100610__peaks.nii.gz",
             "tracking": "example_directory/trainset/100610/masks/100610__mask_wm.nii.gz",
             "seeding": "example_directory/trainset/100610/maps/100610__interface.nii.gz",
+            "fa": "example_directory/trainset/100610/dti/100610__fa.nii.gz",
             "anat": "example_directory/trainset/100610/anat/100610_T1.nii.gz",
             "gm": "example_directory/trainset/100610/masks/100610__mask_gm.nii.gz"
         },
@@ -104,6 +112,7 @@ The script will generate a JSON file with the following structure:
             "peaks": "example_directory/validset/136126/fodfs/136126__peaks.nii.gz",
             "tracking": "example_directory/validset/136126/masks/136126__mask_wm.nii.gz",
             "seeding": "example_directory/validset/136126/maps/136126__interface.nii.gz",
+            "fa": "example_directory/validset/136126/dti/136126__fa.nii.gz",
             "anat": "example_directory/validset/136126/anat/136126_T1.nii.gz",
             "gm": "example_directory/validset/136126/masks/136126__mask_gm.nii.gz"
         },
@@ -115,6 +124,7 @@ The script will generate a JSON file with the following structure:
             "peaks": "example_directory/testset/139435/fodfs/139435__peaks.nii.gz",
             "tracking": "example_directory/testset/139435/masks/139435__mask_wm.nii.gz",
             "seeding": "example_directory/testset/139435/maps/139435__interface.nii.gz",
+            "fa": "example_directory/testset/139435/dti/139435__fa.nii.gz",
             "anat": "example_directory/testset/139435/anat/139435_T1.nii.gz",
             "gm": "example_directory/testset/139435/masks/139435__mask_gm.nii.gz"
         },
@@ -135,6 +145,7 @@ def parse_args():
     parser.add_argument("--peaks_glob", type=str, default="*__peaks.nii.gz", help="Glob pattern for peaks images")
     parser.add_argument("--tracking_glob", type=str, default="*__mask_wm.nii.gz", help="Glob pattern for tracking masks")
     parser.add_argument("--seeding_glob", type=str, default="*__interface.nii.gz", help="Glob pattern for seeding images")
+    parser.add_argument("--fa_glob", type=str, default="*__fa.nii.gz", help="Glob pattern for fractional anisotropy images")
     parser.add_argument("--anat_glob", type=str, default="*_T1.nii.gz", help="Glob pattern for anatomical images")
     parser.add_argument("--gm_glob", type=str, default="*__mask_gm.nii.gz", help="Glob pattern for gray matter masks")
 
@@ -142,6 +153,7 @@ def parse_args():
     parser.add_argument("--peaks_subdir", type=str, default="fodfs", help="Subdirectory where the peaks images are stored within each subject directory.")
     parser.add_argument("--tracking_subdir", type=str, default="masks", help="Subdirectory where the tracking masks are stored within each subject directory.")
     parser.add_argument("--seeding_subdir", type=str, default="maps", help="Subdirectory where the seeding images are stored within each subject directory.")
+    parser.add_argument("--fa_subdir", type=str, default="dti", help="Subdirectory where the fractional anisotropy images are stored within each subject directory.")
     parser.add_argument("--anat_subdir", type=str, default="anat", help="Subdirectory where the anatomical images are stored within each subject directory.")
     parser.add_argument("--gm_subdir", type=str, default="masks", help="Subdirectory where the gray matter masks are stored within each subject directory.")
 
@@ -176,10 +188,10 @@ def resolve_globs(pattern, get_single=False):
 
 
 def get_subject_data(subject_path, dataset, fodf_glob, peaks_glob,
-                     tracking_glob, seeding_glob,
+                     tracking_glob, seeding_glob, fa_glob,
                      anat_glob, gm_glob,
                      fodfs_subdir, peaks_subdir,
-                     tracking_subdir, seeding_subdir,
+                     tracking_subdir, seeding_subdir, fa_subdir,
                      anat_subdir, gm_subdir):
     """Extracts file paths for a given subject."""
     subject_id = subject_path.name
@@ -189,6 +201,7 @@ def get_subject_data(subject_path, dataset, fodf_glob, peaks_glob,
         "peaks":    subject_path / peaks_subdir / peaks_glob,
         "tracking": subject_path / tracking_subdir / tracking_glob,
         "seeding":  subject_path / seeding_subdir / seeding_glob,
+        "fa":       subject_path / fa_subdir / fa_glob,
         "anat":     subject_path / anat_subdir / anat_glob,
         "gm":       subject_path / gm_subdir / gm_glob,
     }
@@ -236,10 +249,18 @@ def main(args):
         subjects = get_all_subjects(dataset_path)
 
         # Create a dictionary for the dataset
-        config[dataset] = {str(sub): get_subject_data(sub, dataset) for sub in subjects}
+        config[dataset] = {}
         for sub in subjects:
             subject_path = dataset_path / sub
-            config[dataset][str(sub)] = get_subject_data(subject_path, dataset)
+            config[dataset][str(sub)] = \
+                get_subject_data(subject_path, dataset,
+                                 args.fodf_glob, args.peaks_glob,
+                                 args.tracking_glob, args.seeding_glob,
+                                 args.fa_glob, args.anat_glob, args.gm_glob,
+                                 args.fodfs_subdir, args.peaks_subdir,
+                                 args.tracking_subdir, args.seeding_subdir,
+                                 args.fa_subdir, args.anat_subdir,
+                                 args.gm_subdir)
 
 
     with open(args.output_file, "w") as f:
