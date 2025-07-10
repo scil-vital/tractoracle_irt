@@ -98,7 +98,7 @@ bash track_docker.sh {cpu,gpu} \
 ### How to track locally
 The previous tracking procedure using Docker containers is simple and effective, but might constrain some users (especially if you develop an extension of this work). To run the tracking yourself without an intermediate technology, you can run the `tractoracle_irt/runners/ttl_track.py` script. There is an extensive list of arguments that you can modify, run `tractoracle_irt/runners/ttl_track.py` to get the full list.
 
-To train, use:
+To track, use:
 ``` bash
 python tractoracle_irt/runners/ttl_track.py \  
     <in_odf>.trk \  
@@ -127,10 +127,9 @@ Before training any agent, you need to have a **trained oracle network**. You ca
 > In order to train any model, you have to correctly install the project locally as no docker image is provided to train. Once you have correctly installed the project, please continue to the next subsections to be able to train your first tracking agent.
 
 ### Preparing your data
-In order to train an agent, you'll need to compile your dataset into a single HDF5 file. TL;DR: use the  `tractoracle_irt/datasets/create_dataset.py` script. You'll require a configuration file for which we have provided an example [here](configs/datasets/ds_inferno_config_example.yml).
+In order to train an agent, you'll need to compile your dataset into a single HDF5 file. TL;DR: use the `tractoracle_irt/datasets/create_dataset_tracking.py` script. You'll require a configuration file for which we have provided an example [here](configs/datasets/ds_inferno_config_example.yml) and that you can create using `tractoracle_irt/datasets/create_config_tracking.py`.
 
-For additional details on how to prepare your data to train your agent, please consult [this guide](docs/build_agent_dataset.md).
-
+For additional details on how to prepare your data to train your agent, please consult [this guide](./docs/build_dataset_tracking.md).
 
 ### Configure your training experiment.
 The main scripts to train any agents are available in the `tractoracle_irt/trainers/` directory. In principle, you can manually run any of these scripts and provide the required arguments according to the experiment you want to run. However, those scripts offer a very long list of customizable arguments which can be cumbersome to individually set for each experiment. Additionnally, we ran the experiments on a SLURM-based system and we had to run a lot of experiments, using different seeds, different datasets, training regimes and more.
@@ -143,10 +142,10 @@ python submit_experiments.py \
     [--cluster] \
     [--submit] \
     [--dry-run]
-    config/file.yaml 
+    config/file.yaml
 ```
 
-This creates one to several bash files that you can run either manually, or submit them all to a SLURM system, making it easier to start multiple jobs at once. It also allows to have experiments that are permanent on disks and easily reproduceable.
+This creates one to several bash files that you can run either manually, or submit them all to a SLURM system, making it easier to start multiple jobs at once. It also allows to have experiments that are permanent on disks and easily reproducible.
 
 ## Contributing
 
