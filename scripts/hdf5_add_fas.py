@@ -5,7 +5,7 @@ import h5py
 import argparse
 from tqdm import tqdm
 
-from tractoracle_irt.datasets.create_dataset import add_volume_to_hdf5
+from tractoracle_irt.datasets.create_dataset_tracking import add_volume_to_hdf5
 
 def parse_args():
     parser = argparse.ArgumentParser()
