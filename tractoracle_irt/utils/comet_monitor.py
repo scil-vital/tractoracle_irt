@@ -243,8 +243,12 @@ class OfflineMonitor(object):
 
         experiment_path = experiment_path
         prefix = _force_prefix_to_slash(prefix)
+        
+        if prefix is None or len(prefix) == 0:
+            self.path = pjoin(experiment_path, "offline_plots")
+        else:
+            self.path = pjoin(experiment_path, "offline_plots", prefix)
 
-        self.path = pjoin(experiment_path, "offline_plots", prefix)
         if self.enabled:
             os.makedirs(self.path, exist_ok=True)
             print(f"Offline monitor initialized at: {self.path}")

@@ -284,11 +284,10 @@ class OracleTrainer(object):
 
                         # Log the loss
                         pbar.set_postfix(
-                            loss=batch_loss,
-                            lr=self.optimizer.param_groups[0]['lr'],
-                            avg_ep_mse=get_mean_item(
-                                ep_train_metrics, 'train_mse'),
-                            train_mse=batch_info['train_mse'])
+                            loss=f"{batch_loss:.4f}",
+                            lr=f"{self.optimizer.param_groups[0]['lr']:.2e}",
+                            avg_ep_mse=f"{get_mean_item(ep_train_metrics, 'train_mse'):.2e}",
+                            train_mse=f"{batch_info['train_mse']:.2e}")
                         pbar.update()
 
                         ep_train_metrics['lr'].append(torch.tensor(
