@@ -1,0 +1,217 @@
+######################################
+# Experiment configuration file for TractOracle-IRT
+# 
+# This file contains the configuration to run one (usually more)
+# experiments using the TractOracle-IRT framework. It is used to
+# generate a bash script for each experiment, which can then be
+# either ran locally (manually) or submitted to a cluster node
+# using SLURM.
+# 
+# The configuration is divided into several sections:
+# - `data`: Contains paths to datasets and experiment directories.
+# - `global`: Contains global parameters that are shared across all experiments.
+# - `extras`: Contains additional parameters that can optionally be added to experiments,
+#             by using the `extra_type` field in the experiment configuration.
+# - `experiments`: Contains the list of experiments to run, each with its own configuration.
+#
+######################################
+# ↳ LOCAL vs CLUSTER path selection:
+# Now, we also aim to support using this method locally.
+# Everytime you wanna specify a path in the configuration below,
+# you can use the following formats:
+# 
+# 1. If you have the same path for LOCAL and CLUSTER nodes:
+#   some_dict:
+#     location: "~/path/to/file/common/to/both"
+#     ...
+#   ...
+# 
+# 2. If you have different paths for LOCAL and CLUSTER nodes:
+#   some_dict:
+#     location:
+#       local: "~/path/to/file/for/local"
+#       cluster: "~/path/to/file/for/cluster"
+#     ...
+#   ...
+# 
+# Depending on the node you are building the script for, only
+# the corresponding path will be used in the bash script generated.
+#
+# ↳ CONFIGURATION VARIABLES:
+# As provided in the example below, you can also use variables within the configuration.
+# Those variables should be defined in the `data` section, just like DATADIR and EXPDIR.
+# You can use the {{VARIABLE_NAME}} syntax to refer to those variables.
+#
+# One default variable is PROJECTDIR, which is the root directory of the project.
+# 
+# ↳ PUBLIC FILES:
+# The authors have made some checkpoints and data files available for anyone to download.
+# If you want to use those files, as they are provided in this example, you can use the
+# "public://" prefix in any string to point towards a a handle that is defined in the
+# <root>/configs/defaults/public_files.yml file. The file will automatically be downloaded
+# to the .data/ directory at the root of the project.
+######################################
+
+######################################
+## Data configuration
+## Bunch of paths pointing to where the data is stored
+## or where it should be stored.
+######################################  
+data:
+  # PROJECTDIR is the root directory of the project. It is defaulted to
+  # the directory where the submit_experiments.py script is located.
+  # You can override it by setting the PROJECTDIR environment variable.
+  # PROJECTDIR:
+  #   local: ""
+  #   cluster: ""
+  DATADIR:
+    local: "{{PROJECTDIR}}/data/datasets"
+    cluster: ""
+  EXPDIR:
+    local: "{{PROJECTDIR}}/data/experiments"
+    cluster: ""
+
+  ismrm2015:
+    name: "ismrm2015"
+    location:
+      local: "{{PROJECTDIR}}/data/datasets/ismrm2015_2mm/ismrm2015.hdf5"
+      cluster: "~/projects/def-pmjodoin/levje/datasets/ismrm2015_2mm_ttl.tar.gz"
+  tractoinferno: 
+    name: "tractoinferno"
+    location:
+      local: "{{PROJECTDIR}}/data/datasets/TractoInferno/tractoinferno_small_fa.hdf5"
+      cluster: ""
+  hcp: 
+    name: "hcp"
+    location:
+      local: ""
+      cluster: ""
+
+######################################
+## Global configuration
+## These configurations are shared across all experiments
+## These parameters can be overridden by the experiment
+## configurations below.
+######################################  
+global:
+  project_name: "IRT-Inferno-Example"
+  launch_script: "tractoracle_irt/trainers/sac_auto_train.py"
+  use_comet: False
+  hidden_dims: "1024-1024-1024"
+  npv: 2
+  min_length: 20
+  max_length: 200
+  noise: 0.0
+  replay_size: 1000000
+  binary_stopping_threshold: 0.1
+  theta: 30
+  n_dirs: 100
+  gamma: 0.95
+  n_actors: 4096
+  batch_size: 4096
+  utd: 1
+  lr: 0.0005
+  max_ep: 3000
+
+  # Change this value of overwrite in the experiment configuration
+  # to change the dataset used.
+  dataset: "tractoinferno"
+
+  # Oracle
+  oracle_bonus: 10
+  oracle_validator: True
+  oracle_stopping_criterion: True
+  reward_ckpt:
+    local: "public://inferno_rbx"
+    cluster: ""
+  crit_ckpt:
+    local: "public://inferno_rbx"
+    cluster: ""
+  
+  # Neighborhood
+  neighborhood_type: "axes"
+  neighborhood_radius: 1
+  flatten_state: True
+  fodf_encoder_ckpt: null
+  conv_state: False
+
+  # Misc
+  log_interval: 50
+  workspace: "tractoracle_irt"
+
+  # Cluster job configuration
+  # This follows the SLURM job submission format
+  cpus: 2
+  time: "3-00:00:00"
+  mem: "40000M"
+
+  # Specifying a list of seeds 
+  seeds: [1111]
+
+######################################
+# Extra configuration parameters
+#
+# These parameters can be added to an experiment configuration
+# identifying its category in the extras-type field.
+# End the name by _ to avoid putting this parameter when its null.
+######################################
+extras:
+  rlhf:
+    warmup_agent_steps: 150
+    agent_train_steps: 50
+    first_oracle_train_steps: 5
+    oracle_train_steps: 1
+    oracle_lr: 0.0005
+    dataset_to_augment_: null
+    nb_new_streamlines_per_iter: 250000
+    alg: "SACAuto"
+    rlhf_inter_npv: 2
+    oracle_batch_size: 1024
+    num_workers: 4
+
+  tractometer:
+    tractometer_validator: True
+    tractometer_reference:
+      local: "{{PROJECTDIR}}/data/datasets/ismrm2015_2mm/scoring_data/t1.nii.gz" # Path within the dataset directory
+      cluster: "scoring_data/t1.nii.gz"
+    scoring_data:
+      local: "{{PROJECTDIR}}/data/datasets/ismrm2015_2mm/scoring_data/" # Path within the dataset directory
+      cluster: "scoring_data/"
+
+  rbx:
+    rbx_validator: True
+    rbx_sif_img_path: null # Set this value to the path of the singularity image (otherwise, it will use docker by default).
+    atlas_directory: "public://rbx_atlas"
+
+  extractor:
+    extractor_validator: True
+    extractor_sif_img_path: null # Set this value to the path of the singularity image (otherwise, it will use docker by default).
+    
+    # This MNI template was extracted from: https://github.com/scilus/extractor_flow/blob/dev2023/containers/templates_and_ROIs.tar.bz2
+    # Only the file used as a target by extractor_flow to register the tractograms into the MNI space was kept.
+    # extractor_target: "public://extractor_target"
+
+  verifyber:
+    verifyber_validator: True
+    verifyber_sif_img_path: null # Set this value to the path of the singularity image (otherwise, it will use docker by default).
+
+######################################
+## Experiment configurations
+## 
+## You can add extra configuration parameters
+## to the experiment configurations by adding
+## extras-type: ["rlhf", "rbx", ...]
+######################################
+
+experiments:
+  - exp_name: "SAC-3K"
+    launch_script: "tractoracle_irt/trainers/sac_auto_train.py"
+    max_ep: 3000
+
+  - exp_name: "CrossQ-IRT-3K"
+    launch_script: "tractoracle_irt/trainers/rlhf_train_simple.py"
+    alg: "CrossQ"
+    extra_type: ["rlhf", "extractor"]
+    cpus: 8
+    mem: "70000M"
+    warmup_agent_steps: 300
