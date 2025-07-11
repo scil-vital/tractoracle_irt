@@ -29,7 +29,7 @@ Then, install the project and its required dependencies with
 # 0. (Optional) Install PyTorch with specific CUDA binaries.
 ./install_torch.sh
 
-# 2. Install the project
+# 1. Install the project
 
 # Using pip
 pip install -e .
@@ -127,7 +127,7 @@ Before training any agent, you need to have a **trained oracle network**. You ca
 > In order to train any model, you have to correctly install the project locally as no docker image is provided to train. Once you have correctly installed the project, please continue to the next subsections to be able to train your first tracking agent.
 
 ### Preparing your data
-In order to train an agent, you'll need to compile your dataset into a single HDF5 file. TL;DR: use the `tractoracle_irt/datasets/create_dataset_tracking.py` script. You'll require a configuration file for which we have provided an example [here](configs/datasets/ds_inferno_config_example.yml) and that you can create using `tractoracle_irt/datasets/create_config_tracking.py`.
+In order to train an agent, you'll need to compile your dataset into a single HDF5 file. TL;DR: use the `tractoracle_irt/datasets/create_dataset_tracking.py` script. You'll require a configuration file that you can create using `tractoracle_irt/datasets/create_config_tracking.py`.
 
 For additional details on how to prepare your data to train your agent, please consult [this guide](./docs/build_dataset_tracking.md).
 
