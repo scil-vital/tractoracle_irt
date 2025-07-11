@@ -20,13 +20,16 @@ from tractoracle_irt.utils.utils import get_project_root_dir, is_running_on_slur
 
 LOGGER = get_logger(__name__)
 
+DOCKER_IMAGE = "mrzarfir/extractorflow-fixed:latest"
+
 # TODO: Add the streamline sampler.
 class ExtractorFilterer(Filterer):
         
     def __init__(self, end_space="mni", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/extractor_flow -r dev2023"):
         super(ExtractorFilterer, self).__init__()
 
-        self.pipeline_command = build_pipeline_command(pipeline_path, use_docker=sif_img_path is None, img_path=sif_img_path)
+        pipeline_image = sif_img_path if sif_img_path is not None else DOCKER_IMAGE
+        self.pipeline_command = build_pipeline_command(pipeline_path, use_docker=sif_img_path is None, img_path=pipeline_image)
         self.flow_configs = [ str(get_project_root_dir() / "configs/nextflow/extractor.config") ] # TODO
         
         self.keep_intermediate_steps = keep_intermediate_steps

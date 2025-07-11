@@ -459,7 +459,7 @@ def add_experiment_args(parser: ArgumentParser):
                         help='Name of experiment.')
     parser.add_argument('experiment_id', type=str,
                         help='ID of experiment.')
-    parser.add_argument('--workspace', type=str, default='TractOracle',
+    parser.add_argument('--workspace', type=str, default='tractoracle_irt',
                         help='Comet.ml workspace')
     parser.add_argument('--rng_seed', default=1337, type=int,
                         help='Seed to fix general randomness')

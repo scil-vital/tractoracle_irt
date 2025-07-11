@@ -21,15 +21,18 @@ from tractoracle_irt.filterers.nextflow import build_pipeline_command
 
 LOGGER = get_logger(__name__)
 
+DOCKER_IMAGE = "mrzarfir/scilus:1.6.0"
+
 # TODO: Add the streamline sampler.
 class RbxFilterer(Filterer):
 
     def __init__(self, atlas_directory: str, sif_img_path: str = None, pipeline_path: str = "levje/rbx_flow -r segregation"):
         super(RbxFilterer, self).__init__()
 
+        pipeline_image = sif_img_path if sif_img_path is not None else DOCKER_IMAGE
         self.pipeline_command = build_pipeline_command(pipeline_path,
                                                        use_docker=sif_img_path is None,
-                                                       img_path=sif_img_path)
+                                                       img_path=pipeline_image)
         
         self.flow_configs = [ str(get_project_root_dir() / "configs/nextflow/rbx.config") ] # TODO
         self.atlas_directory = atlas_directory

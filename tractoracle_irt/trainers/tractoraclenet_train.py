@@ -159,7 +159,7 @@ def parse_args():
     parser.add_argument('--oracle_checkpoint', type=str,
                         help='Path to checkpoint. If not provided, '
                              'train from scratch.')
-    parser.add_argument('--comet_workspace', type=str, default='mrzarfir',
+    parser.add_argument('--comet_workspace', type=str, default='tractoracle_irt',
                         help='Comet workspace.')
     parser.add_argument('--use_comet', action='store_true',
                         help='Use comet for logging.')

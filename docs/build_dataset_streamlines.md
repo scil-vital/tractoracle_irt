@@ -6,7 +6,12 @@
 > and you should refer to the paper behind this repository which should be linked on
 > the main page.
 
-## 0. Prepare your data
+## 0. Generate your data
+To create your dataset, you should have at your disposal a few streamlines (hopefully a few millions) that you have generated using any tractography algorithm (e.g. iFOD2, sd_stream, PTT, etc.), but we recommend using more than one tracking method for improved generalization. You should then filter (or label) each streamline you want to include in your dataset. You can use any filtering method you want (e.g. RecobundlesX, extractor_flow, Verifyber) in order to filter your tractogram files. After filtering, for each subject, you should have a file containing plausible (recognized), a file containing implausible (unrecognized) streamlines and you should also have a reference image in the diffusion space (.nii/.nii.gz).
+
+How to generate and filter those streamlines is out of scope for this guide, but most algorithms are well-documented to help you achieve what you want to do.
+
+## 1. Prepare your data
 
 To build a streamlines dataset, you'll need (a lot) of streamlines already generated and *scored/filtered*.
 This means that you should have the following files for each subject:
