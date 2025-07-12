@@ -43,6 +43,11 @@ On some systems, you might require setting the following environment variable be
 export SETUPTOOLS_USE_DISTUTILS=stdlib
 ```
 
+Also, some scilpy dependencies might require you to have [cargo (the Rust package manager)](https://doc.rust-lang.org/cargo/getting-started/installation.html) installed before installing this project. If you're running locally, you might have to install it yourself, or if you're running this on a HPC, you might simply want to load the package if it's available such as:
+``` bash
+module load rust
+```
+
 ### Install external dependencies
 - [**Nextflow**](https://www.nextflow.io/docs/latest/install.html): We recommend installing version 21.10.3 (or a similar version), as most of the flows we use (i.e. rbx_flow, extractor_flow) do not support Nextflow's DSL2. Nextflow is required to run [RecobundlesX](https://github.com/levje/rbx_flow) and [extractor_flow](https://github.com/scilus/extractor_flow), which are used during the IRT procedure.
 - [**Docker**](https://www.docker.com/get-started/): docker is required to run IRT training when running [RecobundlesX](https://github.com/levje/rbx_flow), [extractor_flow](https://github.com/scilus/extractor_flow) and Verifyber.
