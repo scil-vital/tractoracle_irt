@@ -1,5 +1,5 @@
 # Main dependency
--e git+https://github.com/levje/scilpy@levje/spams-upgrade#egg=scilpy
+scilpy==2.1.0
 
 # Should be included with scilpy.
 h5py>=3.10.*
@@ -8,9 +8,9 @@ dipy>=1.10.*
 nibabel>=5.2.*
 
 # Specific dependencies
-torch==2.7.1
-torchvision==0.22.1
-torchaudio==2.7.1
+torch==2.6.0
+torchvision==0.21.0
+torchaudio>=2.6.0
 numpy==1.25.*
 comet-ml>=3.22.0
 pyyaml>=6.0 

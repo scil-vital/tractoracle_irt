@@ -7,9 +7,9 @@ It is a continuation which builds on top of previous works from *Théberge et al
 ## Getting started
 
 ### (Required) Install the project
-**This repository supports Python 3.10 and 3.11.**
+**This repository supports Python 3.10.**
 
-It is recommended to use a python [virtual environment](https://virtualenv.pypa.io/en/latest/user_guide.html) to run the code.
+It is recommended to use a python [virtual environment](https://virtualenv.pypa.io/en/latest/user_guide.html) to run the code. As the project depends on scilpy, the Python version supported is strongly linked with the versions supported by scilpy.
 
 ``` bash
 # 1. Create virtual environment
@@ -17,7 +17,7 @@ It is recommended to use a python [virtual environment](https://virtualenv.pypa.
 # Using virtualenv
 python -m virtualenv .venv
 # Using uv:
-uv venv --python 3.11
+uv venv --python 3.10
 
 # 2. Activate the environment
 source .venv/bin/activate
