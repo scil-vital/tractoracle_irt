@@ -38,6 +38,11 @@ pip install -e .
 uv pip install -e .
 ```
 
+On some systems, you might require setting the following environment variable before running the installation. If the above installation fails, try pasting the following line in the command line just before re-installing again:
+``` bash
+export SETUPTOOLS_USE_DISTUTILS=stdlib
+```
+
 ### Install external dependencies
 - [**Nextflow**](https://www.nextflow.io/docs/latest/install.html): We recommend installing version 21.10.3 (or a similar version), as most of the flows we use (i.e. rbx_flow, extractor_flow) do not support Nextflow's DSL2. Nextflow is required to run [RecobundlesX](https://github.com/levje/rbx_flow) and [extractor_flow](https://github.com/scilus/extractor_flow), which are used during the IRT procedure.
 - [**Docker**](https://www.docker.com/get-started/): docker is required to run IRT training when running [RecobundlesX](https://github.com/levje/rbx_flow), [extractor_flow](https://github.com/scilus/extractor_flow) and Verifyber.
