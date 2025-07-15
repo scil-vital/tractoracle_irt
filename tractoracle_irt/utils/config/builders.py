@@ -87,7 +87,7 @@ echo "Preparing {self.config['dataset_name']} dataset..."
         self.sections.append(self.param_manager.compile_command())
 
     def _build_post_execution(self):
-        self.sections.append(f"""echo "Experiment available on {self.config["dest_folder"]}""")
+        self.sections.append(f'echo "Experiment available on {self.config["dest_folder"]}"')
 
     def build_script(self):
         self._build_header()
