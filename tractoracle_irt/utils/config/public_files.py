@@ -23,25 +23,37 @@ class FileData:
         FILE = "file"
         DIR = "dir"
 
-    def __init__(self, url: Union[list, str], name, out_type):
+    def __init__(self, url: Union[list, str], name, out_type, target_file=None):
         self.urls = url if isinstance(url, list) else [url]
         self.name = name
         self.out_type = out_type
+        self.target_file = target_file
 
         # If we want to write to a directory, make sure that the name doesn't have an extension.
         if self.out_type == self.FileDataType.DIR and '.' in self.name:
             raise ValueError(f"Invalid name for directory: {self.name}. Directories should not have an extension.") 
     
-        self.path = str(OUTPUT_DIR / self.name)
+        self.path = OUTPUT_DIR / self.name
 
         if self.out_type == self.FileDataType.DIR:
-            os.makedirs(self.path, exist_ok=True)
+            os.makedirs(str(self.path), exist_ok=True)
+        
+        if self.target_file is not None:
+            self.path = self.path / self.target_file
+        self.path = str(self.path)
+
 
     def __repr__(self):
-        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path})"
+        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target_file={self.target_file})"
 
     def __str__(self):
-        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path})"
+        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target_file={self.target_file})"
+
+def get_touch_file_name(url):
+    # Need to hash the URL to create a unique touch file name
+    import hashlib
+    url_hash = hashlib.md5(url.encode()).hexdigest()
+    return f"{TOUCH_FILENAME}_{url_hash}"
 
 def load_public_files():
     raw_config = yaml.safe_load(CONFIG_FILE.read_text())
@@ -52,7 +64,8 @@ def load_public_files():
         if 'url' not in file_info or 'name' not in file_info:
             raise ValueError(f"Missing 'url' or 'name' in {file_name}")
         
-        file_data = FileData(url=file_info['url'], name=file_info['name'], out_type=file_info.get('type', FileData.FileDataType.FILE))
+        file_data = FileData(url=file_info['url'], name=file_info['name'], out_type=file_info.get('type', FileData.FileDataType.FILE),
+                             target_file=file_info.get('target_file', None))
         public_files[file_name] = file_data
 
     # Ensure the output directory exists
@@ -118,7 +131,9 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
     else:
         path_dir = os.path.dirname(path)
 
-    if os.path.exists(os.path.join(path_dir, TOUCH_FILENAME)):
+    url_touch_filename = get_touch_file_name(url)
+    print(f"Downloading {url_touch_filename}")
+    if os.path.exists(os.path.join(path_dir, url_touch_filename)):
         LOGGER.debug(f"File {path} already downloaded. Skipping download.")
         return True
 
@@ -152,7 +167,7 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
         uncompress_files_into_directory(path, output_dir=path_dir, remove_archive=remove_archive)
 
     # Touch a file to signal that the download is created
-    touch_file = Path(path_dir) / TOUCH_FILENAME
+    touch_file = Path(path_dir) / url_touch_filename
     touch_file.touch()
 
     return True

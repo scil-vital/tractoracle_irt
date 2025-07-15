@@ -35,6 +35,7 @@ from tractoracle_irt.utils.torch_utils import assert_accelerator
 from tractoracle_irt.utils.utils import prettier_metrics, prettier_dict
 from tractoracle_irt.filterers.streamlines_sampler import StreamlinesSampler
 from tractoracle_irt.utils.hooks import RlHookEvent
+from tractoracle_irt.utils.config.public_files import download_if_public_file, is_public_file
 from tqdm import tqdm
 from dataclasses import dataclass
 assert_accelerator()
@@ -247,7 +248,17 @@ class RlhfTraining(Training):
         if self.hp.agent_checkpoint is not None:
             # The agent is already pretrained, just need to fine-tune it.
             LOGGER.info(
-                "Skipping pretraining procedure: loading agent from checkpoint...")
+                f"Skipping pretraining procedure: loading agent from checkpoint: {self.hp.agent_checkpoint}")
+            
+            was_public_file = is_public_file(self.hp.agent_checkpoint)
+            self.hp.agent_checkpoint = download_if_public_file(self.hp.agent_checkpoint)
+            if was_public_file:
+                # The previous method returns the path of the directory.
+                # We need to get the checkpoint file from there.
+                self.hp.agent_checkpoint = os.path.join(
+                    self.hp.agent_checkpoint, 'last_model_state.ckpt')
+                print("Agent checkpoint was a public file, downloaded to: {}".format(self.hp.agent_checkpoint))
+
             alg.load_checkpoint(self.hp.agent_checkpoint)
             
             # Instead of having to pack and serialize the model again,

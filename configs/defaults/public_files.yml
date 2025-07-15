@@ -52,18 +52,22 @@ sac_irt_inferno:
   url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/agents/tractoinferno/sac_irt_rbx_inferno.zip"
   name: "sac_irt_inferno"
   type: "dir"
+  target_file: "last_model_state.ckpt"
 
 crossq_irt_inferno:
   url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/agents/tractoinferno/crossq_irt_rbx_inferno.zip"
   name: "crossq_irt_inferno"
   type: "dir"
+  target_file: "last_model_state.ckpt"
 
 sac_irt_hcp:
   url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/agents/hcp/sac_irt_rbx_hcp.zip"
   name: "sac_irt_hcp"
   type: "dir"
+  target_file: "last_model_state.ckpt"
 
 crossq_irt_hcp:
   url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/agents/hcp/crossq_irt_rbx_hcp.zip"
   name: "crossq_irt_hcp"
   type: "dir"
+  target_file: "last_model_state.ckpt"

@@ -25,7 +25,7 @@ DOCKER_IMAGE = "mrzarfir/extractorflow-fixed:latest"
 # TODO: Add the streamline sampler.
 class ExtractorFilterer(Filterer):
         
-    def __init__(self, end_space="mni", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/extractor_flow -r dev2023"):
+    def __init__(self, end_space="orig", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/extractor_flow -r dev2023"):
         super(ExtractorFilterer, self).__init__()
 
         pipeline_image = sif_img_path if sif_img_path is not None else DOCKER_IMAGE

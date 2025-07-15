@@ -10,7 +10,7 @@ from tractoracle_irt.utils.logging import get_logger
 
 LOGGER = get_logger(__name__)
 
-DOCKER_IMAGE = "levje/verifyber:latest"
+DOCKER_IMAGE = "mrzarfir/verifyber:latest"
 
 # TODO: Add the streamline sampler.
 class VerifyberFilterer(Filterer):
@@ -53,7 +53,7 @@ class VerifyberFilterer(Filterer):
         
         results_dir = os.path.join(out_dir, "results")
         for config_path, subject in zip(configs_paths, subjects):
-            self.apptainer_runner.run(
+            self.runner.run(
                 config_path=config_path,
                 output_dir=os.path.join(results_dir, subject)
             )

@@ -7,7 +7,7 @@ from tractoracle_irt.utils.logging import get_logger
 
 LOGGER = get_logger(__name__)
 
-def parse_config(self, config_path):
+def parse_config(config_path):
     with open(config_path, 'r') as f:
         config = json.load(f)
 
