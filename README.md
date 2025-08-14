@@ -3,9 +3,8 @@
 TractOracle-IRT is a reinforcement learning (RL) framework applied to [tractography](https://tractography.io/about/) where the **reward model is iteratively aligned with the policy** during training. It is a continuation which builds on top of previous works from *Théberge et al.* ([see below](#reference-work)).
 
 If you use this project for your work, please cite:
-```
-Levesque, J., Théberge, A., Descoteaux, M., & Jodoin, P-M. (2025). Exploring the robustness of TractOracle methods in RL-based tractography. Medical Image Analysis. https://doi.org/10.1016/j.media.2025.103743
-```
+
+> Levesque, J., Théberge, A., Descoteaux, M., & Jodoin, P-M. (2025). Exploring the robustness of TractOracle methods in RL-based tractography. Medical Image Analysis. https://doi.org/10.1016/j.media.2025.103743
 
 
 ## Getting started
