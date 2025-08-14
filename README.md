@@ -1,8 +1,12 @@
 # TractOracle-IRT: Exploring the robustness of TractOracle methods in RL-based tractography
 
-TractOracle-IRT is a reinforcement learning (RL) framework applied to [tractography](https://tractography.io/about/) where the **reward model is iteratively aligned with the policy** during training.
+TractOracle-IRT is a reinforcement learning (RL) framework applied to [tractography](https://tractography.io/about/) where the **reward model is iteratively aligned with the policy** during training. It is a continuation which builds on top of previous works from *Théberge et al.* ([see below](#reference-work)).
 
-It is a continuation which builds on top of previous works from *Théberge et al.* ([see below](#reference-work)).
+If you use this project for your work, please cite:
+```
+Levesque, J., Théberge, A., Descoteaux, M., & Jodoin, P-M. (2025). Exploring the robustness of TractOracle methods in RL-based tractography. Medical Image Analysis. https://doi.org/10.1016/j.media.2025.103743
+```
+
 
 ## Getting started
 
@@ -151,11 +155,18 @@ Once you have your configuration file set up, you'll have to use `submit_experim
 python submit_experiments.py \
     [--cluster] \
     [--submit] \
-    [--dry-run]
+    [--dry-run] \
+    [--account ACCOUNT-NAME] \
     config/file.yaml
 ```
 
-This creates one to several bash files that you can run either manually, or submit them all to a SLURM system, making it easier to start multiple jobs at once. It also allows to have experiments that are permanent on disks and easily reproducible.
+This creates one to several bash files that you can run either manually, or submit them all to a SLURM system, making it easier to start multiple jobs at once. It also allows to have experiments that are permanent on disks and easily reproducible. Also, if you're using the "cluster" field to specify a path within your configuration file, make sure to provide the `--cluster` flag.
+
+This script offer 3 flags that you can specify as additional arguments:
+1. `--cluster`: If you're using the "cluster" field to specify any path within your configuration, do not forget to specify this flag, otherwise it will only consider the "local" field associated with that location.
+2. `--dry-run`: The script will run and perform the same checks, but it won't write any files. This is usually just to make sure the configuration makes sense and the main paths you specified can be found.
+3. `--submit`: After the creation of the bash scripts, it will call `sbatch` to enqueue each created bash script as a new job to the SLURM scheduler. Mostly useful if you want to avoid submitting each script manually.
+4. `--account`: Only used if `--submit` is also specified. This will simply specify under which account the jobs should be submitted to the SLURM scheduler.
 
 ## Contributing
 
