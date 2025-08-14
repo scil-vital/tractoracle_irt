@@ -1,6 +1,6 @@
 import os
 
-def build_pipeline_command(pipeline: str, use_docker: bool, img_path: str) -> str:
+def build_pipeline_command(pipeline: str, use_docker: bool, img_path: str, path_only: bool = False) -> str:
     """
     Build the nextflow command to run a pipeline.
     As most nextflow pipelines we use are designed to run in a containerized environment,
@@ -20,6 +20,9 @@ def build_pipeline_command(pipeline: str, use_docker: bool, img_path: str) -> st
     Returns:
         str: The command to run the RBX pipeline.
     """
+    if path_only:
+        return pipeline
+    
     if use_docker:
         return f"{pipeline} -with-docker {img_path}"
     else:

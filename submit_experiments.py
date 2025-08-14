@@ -129,7 +129,6 @@ def main():
         pm.add_param("--alg", config.get("alg", None))
         pm.add_param("--agent_train_steps", config.get("agent_train_steps", None))
         pm.add_param("--oracle_train_steps", config.get("oracle_train_steps", None))
-        pm.add_param("--warmup_agent_steps", config.get("warmup_agent_steps", None))
         pm.add_param("--first_oracle_train_steps", config.get('first_oracle_train_steps', None))
         pm.add_param("--oracle_lr", config.get("oracle_lr", None))
         pm.add_param("--dataset_to_augment", config.get("dataset_to_augment", None))

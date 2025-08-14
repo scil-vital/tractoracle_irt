@@ -21,20 +21,31 @@ from tractoracle_irt.filterers.nextflow import build_pipeline_command
 
 LOGGER = get_logger(__name__)
 
-DOCKER_IMAGE = "mrzarfir/scilus:1.6.0"
+# Using the image mrzarfir/scilus:1.6.0 should also work.
+DOCKER_IMAGE = "mrzarfir/scilus:2.1.0"
+
+RESULTS_INDICES_DIRNAME = "COMPILE_REPORTS"
+RESULTS_INDICES_FILENAME = ""
 
 # TODO: Add the streamline sampler.
 class RbxFilterer(Filterer):
 
-    def __init__(self, atlas_directory: str, sif_img_path: str = None, pipeline_path: str = "levje/rbx_flow -r segregation"):
+    def __init__(self, atlas_directory: str, sif_img_path: str = None, pipeline_path: str = "levje/nf-rbx -r 1538f45"):
         super(RbxFilterer, self).__init__()
 
         pipeline_image = sif_img_path if sif_img_path is not None else DOCKER_IMAGE
+        use_docker = sif_img_path is None
         self.pipeline_command = build_pipeline_command(pipeline_path,
-                                                       use_docker=sif_img_path is None,
-                                                       img_path=pipeline_image)
-        
-        self.flow_configs = [ str(get_project_root_dir() / "configs/nextflow/rbx.config") ] # TODO
+                                                       use_docker=use_docker,
+                                                       img_path=pipeline_image,
+                                                       path_only=True)
+        self.profiles = ['essential', 'compile_reports']
+        if use_docker:
+            self.profiles.append('docker')
+        else:
+            self.profiles.append('apptainer')
+
+        self.flow_configs = []
         self.atlas_directory = atlas_directory
         
         if atlas_directory is None:
@@ -78,7 +89,8 @@ class RbxFilterer(Filterer):
                     pipeline_path=self.pipeline_command,
                     run_path=run_path,
                     configs=self.flow_configs,
-                    params=params):
+                    params=params,
+                    profiles=self.profiles):
             LOGGER.info("Running RBX pipeline...")
             # LOGGER.info(execution.stdout)
             pass
@@ -113,18 +125,24 @@ class RbxFilterer(Filterer):
         """
         RBX flow organizes the results in the results_dir the following way:
         ├── <subid_1>/
-        │   ├── Clean_Bundles/
+        │   ├── COMPILE_REPORTS/
         |   |   ├── ...
-        │   |   └── <subid_1>__results_indices.json
-        │   ├── Recognize_Bundles/
-        │   └── Register_Anat/
+        │   |   └── <subid_1>__report_clean.json
+        │   ├── CLEAN_BUNDLES/
+        │   ├── RECOGNIZE_BUNDLES/
+        │   └── REGISTER_ANAT/
         ├── <subid_2>/
-        │   ├── Clean_Bundles/
+        │   ├── COMPILE_REPORTS/
         |   |   ├── ...
-        │   |   └── <subid_2>__results_indices.json
-        │   ├── Recognize_Bundles/
-        │   └── Register_Anat/
+        │   |   └── <subid_2>__report_clean.json
+        │   ├── CLEAN_BUNDLES/
+        │   ├── RECOGNIZE_BUNDLES/
+        │   └── REGISTER_ANAT/
         ├── ...
+
+        The *__report_clean.json file contains the indices of the streamlines
+        that were recognized to be associated to each bundle. Some duplicates
+        are possible.
         """
 
         valid_indices = {} # List of np.ndarray for each subject
@@ -136,12 +154,12 @@ class RbxFilterer(Filterer):
 
             subid = subject_dir.name
 
-            clean_bundles_dir = subject_dir / "Clean_Bundles"
-            if not clean_bundles_dir.exists():
-                LOGGER.warning(f"Subject directory {clean_bundles_dir} does not exist.")
+            results_indices_dir = subject_dir / RESULTS_INDICES_DIRNAME
+            if not results_indices_dir.exists():
+                LOGGER.warning(f"Subject directory {results_indices_dir} does not exist.")
                 continue
 
-            results_indices = clean_bundles_dir / f"{subject_dir.name}__results_indices.json"
+            results_indices = results_indices_dir / f"{subject_dir.name}__report_clean.json"
             if not results_indices.exists():
                 LOGGER.warning(f"Results indices {results_indices} does not exist.")
                 continue
@@ -154,7 +172,7 @@ class RbxFilterer(Filterer):
             # The recognized indices are spread across the bundles
             sub_recognized_indices = set()
             for bundle in res.keys():
-                rec = res[bundle]["indices"]
+                rec = res[bundle]
                 sub_recognized_indices.update(rec)
 
             sub_all_indices = np.arange(nb_streamlines)
