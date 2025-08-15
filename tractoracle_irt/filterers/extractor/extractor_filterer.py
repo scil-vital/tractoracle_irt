@@ -11,6 +11,7 @@ import nextflow
 from dipy.io.streamline import load_tractogram
 from dipy.io.streamline import save_tractogram
 import os
+import glob
 from pathlib import Path
 from typing import Union
 
@@ -25,12 +26,24 @@ DOCKER_IMAGE = "mrzarfir/extractorflow-fixed:latest"
 # TODO: Add the streamline sampler.
 class ExtractorFilterer(Filterer):
         
-    def __init__(self, end_space="orig", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/extractor_flow -r dev2023"):
+    def __init__(self, templates_dir, end_space="orig", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/nf-extractor -r 6dcab82"):
         super(ExtractorFilterer, self).__init__()
+        self.templates_dir = templates_dir
+        if self.templates_dir is None:
+            raise ValueError("Templates directory must be specified.")
+        elif not os.path.exists(self.templates_dir):
+            raise ValueError(f"Templates directory does not exist: {self.templates_dir}")
 
         pipeline_image = sif_img_path if sif_img_path is not None else DOCKER_IMAGE
-        self.pipeline_command = build_pipeline_command(pipeline_path, use_docker=sif_img_path is None, img_path=pipeline_image)
-        self.flow_configs = [ str(get_project_root_dir() / "configs/nextflow/extractor.config") ] # TODO
+        use_docker = sif_img_path is None
+        self.pipeline_command = build_pipeline_command(pipeline_path, use_docker=use_docker, img_path=pipeline_image, path_only=True)
+        self.flow_configs = [ ] # TODO
+
+        self.profiles = []
+        if use_docker:
+            self.profiles.append('docker')
+        else:
+            self.profiles.append('apptainer')
         
         self.keep_intermediate_steps = keep_intermediate_steps
         self.quick_registration = quick_registration
@@ -64,6 +77,7 @@ class ExtractorFilterer(Filterer):
         assert verify_root_structure(in_directory, requires_t1w=self.ends_up_in_orig_space)
         params = {
             "input": in_directory,
+            "templates_dir": self.templates_dir,
             "quick_registration": str(self.quick_registration).lower(),
             "orig": str(self.ends_up_in_orig_space).lower(), 
             "keep_intermediate_steps": str(self.keep_intermediate_steps).lower()
@@ -80,7 +94,8 @@ class ExtractorFilterer(Filterer):
                     pipeline_path=self.pipeline_command,
                     run_path=run_path,
                     configs=self.flow_configs,
-                    params=params):
+                    params=params,
+                    profiles=self.profiles):
             LOGGER.info("Running Extractor pipeline. ")
             LOGGER.info(execution.stdout)
         
@@ -106,15 +121,23 @@ class ExtractorFilterer(Filterer):
         Extractor-flow organizes the results in the results_dir the following way:
         results_dir/ (i.e. final_outputs/)
         ├── <subid_1>/
+        │   └── orig_space/
+        |       ├── ...
+        │       ├── <subid_1>__plausible*_orig_space.trk
+        │       └── <subid_1>__unplausible*_orig_space.trk
         │   └── mni_space/
         |       ├── ...
-        │       ├── <subid_1>__plausible_mni_space.trk
-        │       └── <subid_1>__unplausible_mni_space.trk
+        │       ├── <subid_1>__plausible*_mni_space.trk
+        │       └── <subid_1>__unplausible*_mni_space.trk
         ├── <subid_2>/
+        │   └── orig_space/
+        |       ├── ...
+        │       ├── <subid_2>__plausible*_orig_space.trk
+        │       └── <subid_2>__unplausible*_orig_space.trk
         │   └── mni_space/
         |       ├── ...
-        │       ├── <subid_2>__plausible_mni_space.trk
-        │       └── <subid_2>__unplausible_mni_space.trk
+        │       ├── <subid_2>__plausible*_mni_space.trk
+        │       └── <subid_2>__unplausible*_mni_space.trk
         ├── ...
     
         This function returns the paths to the plausible/unplausible tractograms for each subject
@@ -129,22 +152,28 @@ class ExtractorFilterer(Filterer):
             if not subject_dir.is_dir():
                 continue
 
-            mni_space_dir = subject_dir / self.space_directory
-            if not mni_space_dir.exists():
-                LOGGER.warning(f"Subject directory {mni_space_dir} does not exist.")
+            results_space_dir = subject_dir / self.space_directory
+            if not results_space_dir.exists():
+                LOGGER.warning(f"Subject directory {results_space_dir} does not exist.")
                 continue
 
-            plausible = mni_space_dir / f"{subject_dir.name}__plausible_{self.space_directory}.trk"
+            plausible_glob = results_space_dir / f"{subject_dir.name}__plausible*_{self.space_directory}.trk"
+            plausible = plausible_glob.glob()
+            if plausible is None or len(plausible) == 0:
+                LOGGER.error(f"No plausible tractograms found for {subject_dir.name} in {plausible_glob}.")
             if not plausible.exists():
-                LOGGER.warning(f"Plausible tractogram {plausible} does not exist.")
+                LOGGER.error(f"Plausible tractogram {plausible} does not exist.")
             else:
-                valid.append(str(plausible))
+                valid.append(str(plausible[0]))
 
-            unplausible = mni_space_dir / f"{subject_dir.name}__unplausible_{self.space_directory}.trk"
-            if not unplausible.exists():
-                LOGGER.warning(f"Unplausible tractogram {unplausible} does not exist.")
+            unplausible_glob = results_space_dir / f"{subject_dir.name}__unplausible*_{self.space_directory}.trk"
+            unplausible = unplausible_glob.glob()
+            if unplausible is None or len(unplausible) == 0:
+                LOGGER.error(f"No unplausible tractograms found for {subject_dir.name} in {unplausible_glob}.")
+            elif not unplausible.exists():
+                LOGGER.error(f"Unplausible tractogram {unplausible} does not exist.")
             else:
-                invalid.append(str(unplausible))
+                invalid.append(str(unplausible[0]))
 
             subject_ids.append(subject_dir.name)
 

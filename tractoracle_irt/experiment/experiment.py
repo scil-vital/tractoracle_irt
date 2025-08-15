@@ -568,7 +568,9 @@ def add_extractor_args(parser: ArgumentParser):
                            ' If not provided, the filterer will use the Docker image.')
     extractor.add_argument('--extractor_target', type=str, default=None,
                            help='Target file for the extractor.')
-    
+    extractor.add_argument('--extractor_templates', type=str, default=None,
+                           help='Directory containing the templates for the extractor.')
+
 def add_verifyber_args(parser: ArgumentParser):
     verifyber = parser.add_argument_group('Verifyber Filterer')
     verifyber.add_argument('--verifyber_validator', action='store_true',

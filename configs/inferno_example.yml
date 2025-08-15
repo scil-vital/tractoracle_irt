@@ -186,6 +186,7 @@ extras:
   extractor:
     extractor_validator: True
     extractor_sif_img_path: null # Set this value to the path of the singularity image (otherwise, it will use docker by default).
+    extractor_templates: "public://extractor_templates"
     
     # This MNI template was extracted from: https://github.com/scilus/extractor_flow/blob/dev2023/containers/templates_and_ROIs.tar.bz2
     # Only the file used as a target by extractor_flow to register the tractograms into the MNI space was kept.

@@ -48,6 +48,11 @@ extractor_target:
   name: "JHU_MNI_SS_T1_brain_182x218x182_conv_f.nii.gz"
   type: "file"
 
+extractor_templates:
+  url: ["https://github.com/scilus/extractor_flow/raw/refs/heads/master/containers/filtering_lists.tar.bz2", "https://github.com/scilus/extractor_flow/raw/refs/heads/master/containers/templates_and_ROIs.tar.bz2"]
+  name: "extractor_templates"
+  type: "dir"
+
 sac_irt_inferno:
   url: "https://tractoracle-irt.s3.us-east-2.amazonaws.com/agents/tractoinferno/sac_irt_rbx_inferno.zip"
   name: "sac_irt_inferno"

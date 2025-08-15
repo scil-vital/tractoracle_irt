@@ -45,6 +45,7 @@ class HParams:
     extractor_validator: bool
     extractor_sif_img_path: str
     extractor_target: str
+    extractor_templates: str
 
     # RBX Filterer parameters
     rbx_validator: bool

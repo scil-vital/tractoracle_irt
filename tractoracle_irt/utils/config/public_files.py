@@ -4,6 +4,7 @@ import requests
 from dataclasses import dataclass
 from tqdm import tqdm
 import zipfile
+import tarfile
 from pathlib import Path
 
 from typing import Union
@@ -132,7 +133,6 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
         path_dir = os.path.dirname(path)
 
     url_touch_filename = get_touch_file_name(url)
-    print(f"Downloading {url_touch_filename}")
     if os.path.exists(os.path.join(path_dir, url_touch_filename)):
         LOGGER.debug(f"File {path} already downloaded. Skipping download.")
         return True
@@ -143,6 +143,7 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
 
     filename = os.path.basename(path)
 
+    print(f"Downloading {url_touch_filename}")
     try:
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
@@ -163,8 +164,10 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
             print(f"Error downloading {filename}: {e}")
         return False
 
-    if path.endswith('.zip'):
-        uncompress_files_into_directory(path, output_dir=path_dir, remove_archive=remove_archive)
+    if is_zip_file(path):
+        unzip_files_into_directory(path, output_dir=path_dir, remove_archive=remove_archive)
+    if is_tar_file(path):
+        untar_files_into_directory(path, output_dir=path_dir, remove_archive=remove_archive)
 
     # Touch a file to signal that the download is created
     touch_file = Path(path_dir) / url_touch_filename
@@ -172,10 +175,13 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
 
     return True
 
-def uncompress_files_into_directory(*zip_files, output_dir=OUTPUT_DIR, remove_archive=False):
+def is_zip_file(file_path):
+    return file_path.endswith('.zip')
+
+def unzip_files_into_directory(*zip_files, output_dir=OUTPUT_DIR, remove_archive=False):
     os.makedirs(output_dir, exist_ok=True)
     for zip_file in zip_files:
-        if not zip_file.endswith('.zip'):
+        if not is_zip_file(zip_file):
             raise ValueError(f"Expected a .zip file, got {zip_file}")
         
         zip_path = os.path.join(output_dir, zip_file)
@@ -187,4 +193,28 @@ def uncompress_files_into_directory(*zip_files, output_dir=OUTPUT_DIR, remove_ar
         if remove_archive:
             os.remove(zip_path)
             LOGGER.info(f"Removed archive {zip_path}")
+    return str(output_dir)
+
+def is_tar_file(file_path):
+    return (file_path.endswith('.tar') or file_path.endswith('.tar.gz') or
+            file_path.endswith('.tgz') or file_path.endswith('.tar.bz2') or
+            file_path.endswith('.tar.xz'))
+
+def untar_files_into_directory(*tar_files, output_dir=OUTPUT_DIR, remove_archive=False):
+    os.makedirs(output_dir, exist_ok=True)
+    for tar_file in tar_files:
+        if not is_tar_file(tar_file):
+            raise ValueError(f"Expected a tar file, got {tar_file}")
+        
+        tar_path = os.path.join(output_dir, tar_file)
+        if not os.path.exists(tar_path):
+            raise FileNotFoundError(f"Tar file {tar_path} does not exist.")
+        
+        with tarfile.open(tar_path, 'r:*') as tar_ref:
+            tar_ref.extractall(output_dir)
+        
+        if remove_archive:
+            os.remove(tar_path)
+            LOGGER.info(f"Removed archive {tar_path}")
+    
     return str(output_dir)

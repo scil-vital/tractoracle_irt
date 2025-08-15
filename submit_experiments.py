@@ -163,6 +163,7 @@ def main():
 
         pm.add_flag_if_true("--extractor_validator", config.get("extractor_validator", False))
         pm.add_param("--extractor_target", config.get("extractor_target", None))
+        pm.add_param("--extractor_templates", config.get("extractor_templates", None))
 
         pm.add_flag_if_true("--verifyber_validator", config.get("verifyber_validator", False))
         pm.add_param("--verifyber_sif_img_path", config.get("verifyber_sif_img_path", None))

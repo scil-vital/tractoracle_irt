@@ -294,7 +294,7 @@ class RlhfTraining(Training):
             
         if self.hp.extractor_validator:
             self.filterers.append(
-                ExtractorFilterer(sif_img_path=self.hp.extractor_sif_img_path))
+                ExtractorFilterer(templates_dir=self.hp.extractor_templates, sif_img_path=self.hp.extractor_sif_img_path))
             
             self.extractor_filterer = self.filterers[-1]
 
@@ -338,7 +338,7 @@ class RlhfTraining(Training):
             ################################################
             # Train the RL agent
             ################################################
-            agent_nb_steps = self.hp.agent_train_steps if not do_warmup else self.hp.warmup_agent_steps
+            agent_nb_steps = self.hp.warmup_agent_steps if do_warmup else self.hp.agent_train_steps
             if do_warmup:
                 LOGGER.info(
                     "Warming up agent for {} steps.".format(agent_nb_steps))
