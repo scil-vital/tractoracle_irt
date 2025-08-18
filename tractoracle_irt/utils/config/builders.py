@@ -18,13 +18,12 @@ class BashScriptBuilder:
             if self.is_local:
                 return ""
             else:
-                return """
+                return f"""
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task={config["cpus"]}
-#SBATCH --mem={config["mem"]}
-#SBATCH --time={config["time"]}
-#SBATCH --job-name={config["exp_name"]}
-#SBATCH --mail-user=jeremi.levesque@usherbrooke.ca
+#SBATCH --cpus-per-task={self.config["cpus"]}
+#SBATCH --mem={self.config["mem"]}
+#SBATCH --time={self.config["time"]}
+#SBATCH --job-name={self.config["exp_name"]}
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
 """

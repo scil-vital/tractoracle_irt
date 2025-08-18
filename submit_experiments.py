@@ -71,7 +71,7 @@ def main():
         if args.cluster:
             commands = [
                 "# Extract dataset",
-                f'echo "Preparing {dataset_name} dataset...',
+                f'echo "Preparing {dataset_name} dataset..."',
                 "mkdir -p $SLURM_TMPDIR/experiments",
                 "mkdir -p $SLURM_TMPDIR/datasets",
             ]
