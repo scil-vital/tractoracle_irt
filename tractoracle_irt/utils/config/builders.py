@@ -71,8 +71,6 @@ source ~/tractoracle_irt/venv/bin/activate
 mkdir -p $SLURM_TMPDIR/data
 mkdir -p $SLURM_TMPDIR/experiments
 
-# Extract dataset
-echo "Preparing {self.config['dataset_name']} dataset..."
 {self.prepare_dataset_command}
 """
         setup_comet = self._build_setup_comet()
