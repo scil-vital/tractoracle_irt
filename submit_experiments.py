@@ -78,9 +78,9 @@ def main():
             if get_dataset_type(hdf5_path) == "tar":
                 # If the dataset is a tar file, we need to extract it
                 # In our case, the tar file is specifically the ISMRM2015 dataset.
-                commands += f"tar xf {hdf5_path} -C $SLURM_TMPDIR/datasets"
+                commands.append(f"tar xf {hdf5_path} -C $SLURM_TMPDIR/datasets")
             else:
-                commands += f"cp {hdf5_path} $SLURM_TMPDIR/datasets/{dataset_name}.hdf5"
+                commands.append(f"cp {hdf5_path} $SLURM_TMPDIR/datasets/{dataset_name}.hdf5")
 
             prepare_dataset_command = "\n".join(commands)
             hdf5_path = os.path.join("$SLURM_TMPDIR/datasets", f"{dataset_name}.hdf5")
