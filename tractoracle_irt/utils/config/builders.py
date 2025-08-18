@@ -60,9 +60,9 @@ set -e
         if not self.is_local:
             cluster_setup = f"""
 echo "Loading modules and virtual env..."
-module load StdEnv/2020
-module load nextflow/21.10.3
-module load apptainer/1.1.8
+module load StdEnv/2023
+module load nextflow/25.04.6
+module load apptainer/1.3.5
 module load python/3.10 cuda cudnn httpproxy
 source ~/tractoracle_irt/venv/bin/activate
 
