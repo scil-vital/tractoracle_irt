@@ -33,15 +33,13 @@ class FileData:
         if self.out_type == self.FileDataType.DIR and '.' in self.name:
             raise ValueError(f"Invalid name for directory: {self.name}. Directories should not have an extension.") 
     
-        self.path = OUTPUT_DIR / self.name
 
+        self.path = OUTPUT_DIR / self.name
         if self.out_type == self.FileDataType.DIR:
             os.makedirs(str(self.path), exist_ok=True)
-        
-        if self.target_file is not None:
-            self.path = self.path / self.target_file
-        self.path = str(self.path)
 
+        self.target_file = str(self.path / target_file) if target_file is not None else target_file
+        self.path = str(self.path)
 
     def __repr__(self):
         return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target_file={self.target_file})"
@@ -132,7 +130,6 @@ def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_a
         path_dir = os.path.dirname(path)
 
     url_touch_filename = get_touch_file_name(url)
-    print(f"Downloading {url_touch_filename}")
     if os.path.exists(os.path.join(path_dir, url_touch_filename)):
         LOGGER.debug(f"File {path} already downloaded. Skipping download.")
         return True
