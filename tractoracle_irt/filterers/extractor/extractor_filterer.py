@@ -26,7 +26,7 @@ DOCKER_IMAGE = "mrzarfir/extractorflow-fixed:latest"
 # TODO: Add the streamline sampler.
 class ExtractorFilterer(Filterer):
         
-    def __init__(self, templates_dir, end_space="orig", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/nf-extractor -r 6dcab82"):
+    def __init__(self, templates_dir, end_space="orig", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/nf-extractor -r 6dcae7b"):
         super(ExtractorFilterer, self).__init__()
         self.templates_dir = templates_dir
         if self.templates_dir is None:
