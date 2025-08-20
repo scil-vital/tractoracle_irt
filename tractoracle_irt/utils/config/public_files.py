@@ -35,14 +35,8 @@ class FileData:
             raise ValueError(f"Invalid name for directory: {self.name}. Directories should not have an extension.") 
     
         self.path = OUTPUT_DIR / self.name
-
-        if self.out_type == self.FileDataType.DIR:
-            os.makedirs(str(self.path), exist_ok=True)
-        
-        if self.target_file is not None:
-            self.path = self.path / self.target_file
+        self.target_file = str(self.path / target_file) if target_file is not None else target_file
         self.path = str(self.path)
-
 
     def __repr__(self):
         return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target_file={self.target_file})"
@@ -119,12 +113,12 @@ def download_file_data(file_data: FileData, remove_archive=False):
         raise TypeError(f"Expected FileData, got {type(file_data)}")
     
     for url in file_data.urls:
-        download_file(url, file_data.path, except_on_error=True, remove_archive=remove_archive)
+        download_file(url, file_data.path, file_data.out_type, except_on_error=True, remove_archive=remove_archive)
     return True
 
-def download_file(url, path, skip_if_exists=True, except_on_error=True, remove_archive=False):
+def download_file(url, path, out_type, skip_if_exists=True, except_on_error=True, remove_archive=False):
     # If path is a directory, add the filename from the URL
-    if os.path.isdir(path):
+    if out_type == FileData.FileDataType.DIR:
         path_dir = path
         os.makedirs(path, exist_ok=True)
         url_filename = os.path.basename(urlparse(url).path)

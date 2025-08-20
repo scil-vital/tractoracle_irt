@@ -18,13 +18,12 @@ class BashScriptBuilder:
             if self.is_local:
                 return ""
             else:
-                return """
+                return f"""
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task={config["cpus"]}
-#SBATCH --mem={config["mem"]}
-#SBATCH --time={config["time"]}
-#SBATCH --job-name={config["exp_name"]}
-#SBATCH --mail-user=jeremi.levesque@usherbrooke.ca
+#SBATCH --cpus-per-task={self.config["cpus"]}
+#SBATCH --mem={self.config["mem"]}
+#SBATCH --time={self.config["time"]}
+#SBATCH --job-name={self.config["exp_name"]}
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL
 """
@@ -61,9 +60,9 @@ set -e
         if not self.is_local:
             cluster_setup = f"""
 echo "Loading modules and virtual env..."
-module load StdEnv/2020
-module load nextflow/21.10.3
-module load apptainer/1.1.8
+module load StdEnv/2023
+module load nextflow/25.04.6
+module load apptainer/1.3.5
 module load python/3.10 cuda cudnn httpproxy
 source ~/tractoracle_irt/venv/bin/activate
 
@@ -71,8 +70,6 @@ source ~/tractoracle_irt/venv/bin/activate
 mkdir -p $SLURM_TMPDIR/data
 mkdir -p $SLURM_TMPDIR/experiments
 
-# Extract dataset
-echo "Preparing {self.config['dataset_name']} dataset..."
 {self.prepare_dataset_command}
 """
         setup_comet = self._build_setup_comet()
