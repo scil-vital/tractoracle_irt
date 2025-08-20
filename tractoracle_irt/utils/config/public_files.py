@@ -35,14 +35,23 @@ class FileData:
             raise ValueError(f"Invalid name for directory: {self.name}. Directories should not have an extension.") 
     
         self.path = OUTPUT_DIR / self.name
-        self.target_file = str(self.path / target_file) if target_file is not None else target_file
+
+        if target_file is not None and self.out_type == self.FileDataType.DIR:
+            self.target = str(self.path / target_file)
+        elif target_file is None:
+            self.target = str(self.path)
+        elif target_file is not None and self.out_type == self.FileDataType.FILE:
+            raise ValueError(f"target_file should only be specified when 'type' is 'dir', got {self.out_type} for {self.name}")
+        else:
+            raise ValueError(f"An unexpected issue has occured w.r.t the target file.")
+
         self.path = str(self.path)
 
     def __repr__(self):
-        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target_file={self.target_file})"
+        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target={self.target})"
 
     def __str__(self):
-        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target_file={self.target_file})"
+        return f"FileData(name={self.name}, urls={self.urls}, out_type={self.out_type}, path={self.path}, target={self.target})"
 
 def get_touch_file_name(url):
     # Need to hash the URL to create a unique touch file name
@@ -105,7 +114,7 @@ def download_if_public_file(path: str) -> str:
         public_file_data = PUBLIC_FILES.get(path, None)
         if public_file_data is not None:
             download_file_data(public_file_data)
-            path = public_file_data.path # Update the path to the downloaded file
+            path = public_file_data.target # Update the path to the downloaded file
     return path
 
 def download_file_data(file_data: FileData, remove_archive=False):
