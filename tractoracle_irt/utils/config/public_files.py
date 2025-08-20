@@ -35,9 +35,6 @@ class FileData:
     
 
         self.path = OUTPUT_DIR / self.name
-        if self.out_type == self.FileDataType.DIR:
-            os.makedirs(str(self.path), exist_ok=True)
-
         self.target_file = str(self.path / target_file) if target_file is not None else target_file
         self.path = str(self.path)
 
