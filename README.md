@@ -77,7 +77,7 @@ You will need a trained agent for tracking. We provide the weights of our IRT-tr
 
 By default, the tracking script will use the `public://sac_irt_inferno` checkpoint. Those are also available in the docker image specified [below](#track-with-a-docker-image).
 
-You can also provide your own You will need to provide fODFs, a seeding mask and a WM mask. The seeding mask **must** represent the interface of white matter and gray matter. For optimal results, the interface mask should contain voxels from both the white and gray matter.
+You will need to provide fODFs, a seeding mask and a WM mask. The seeding mask **must** represent the interface of white matter and gray matter. For optimal results, the interface mask should contain voxels from both the white and gray matter.
 
 Agents used for tracking are constrained by their training regime. For example, the agents provided in `models` were trained on a volume with a resolution of ~1mm iso voxels and a step size of 0.75mm using fODFs of order 6, `descoteaux07` basis. When tracking on arbitrary data, the step-size and fODF order and basis will be adjusted accordingly automatically (i.e resulting in a step size of 0.375mm on 0.5mm iso diffusion data). **However**, if using fODFs in the `tournier07` basis, you will need to set the `--sh_basis` argument accordingly.
 
@@ -109,7 +109,7 @@ bash track_docker.sh {cpu,gpu} \
     <output_directory>
 ```
 
-### How to track locally
+### Track locally
 The previous tracking procedure using Docker containers is simple and effective, but might constrain some users (especially if you develop an extension of this work). To run the tracking yourself without an intermediate technology, you can run the `tractoracle_irt/runners/ttl_track.py` script. There is an extensive list of arguments that you can modify, run `tractoracle_irt/runners/ttl_track.py` to get the full list.
 
 To track, use:
