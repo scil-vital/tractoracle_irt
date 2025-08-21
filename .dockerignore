@@ -96,3 +96,11 @@ tests/
 Dockerfile
 .gitignore
 .git/
+.data/
+
+docs/
+install_torch.sh
+requirements.txt
+results/
+README.md
+fodf_ae/

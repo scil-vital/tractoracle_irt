@@ -61,6 +61,7 @@ For convenience and to ensure reproducibility of our experiments, we have made s
 - Oracles checkpoints.
 - IRT trained agents checkpoints.
 - RBX Atlas.
+- Extractor Templates
 - Extractor MNI registration target.
 - Potentially others upon request.
 
