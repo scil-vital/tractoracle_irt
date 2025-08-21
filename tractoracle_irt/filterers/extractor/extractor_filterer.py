@@ -157,23 +157,19 @@ class ExtractorFilterer(Filterer):
                 LOGGER.warning(f"Subject directory {results_space_dir} does not exist.")
                 continue
 
-            plausible_glob = results_space_dir / f"{subject_dir.name}__plausible*_{self.space_directory}.trk"
-            plausible = plausible_glob.glob()
-            if plausible is None or len(plausible) == 0:
-                LOGGER.error(f"No plausible tractograms found for {subject_dir.name} in {plausible_glob}.")
-            if not plausible.exists():
-                LOGGER.error(f"Plausible tractogram {plausible} does not exist.")
+            plausible_pattern = f"{subject_dir.name}__*plausible*_{self.space_directory}.trk"
+            plausible = get_single_file_glob(results_space_dir, plausible_pattern, exclude="unplausible")
+            if plausible is None:
+                LOGGER.error(f"No plausible tractograms found for {subject_dir.name} in {plausible_pattern}.")
             else:
-                valid.append(str(plausible[0]))
+                valid.append(str(plausible))
 
-            unplausible_glob = results_space_dir / f"{subject_dir.name}__unplausible*_{self.space_directory}.trk"
-            unplausible = unplausible_glob.glob()
-            if unplausible is None or len(unplausible) == 0:
-                LOGGER.error(f"No unplausible tractograms found for {subject_dir.name} in {unplausible_glob}.")
-            elif not unplausible.exists():
-                LOGGER.error(f"Unplausible tractogram {unplausible} does not exist.")
+            unplausible_pattern = f"{subject_dir.name}__*unplausible*_{self.space_directory}.trk"
+            unplausible = get_single_file_glob(results_space_dir, unplausible_pattern)
+            if unplausible is None:
+                LOGGER.error(f"No unplausible tractograms found for {subject_dir.name} in {unplausible_pattern}.")
             else:
-                invalid.append(str(unplausible[0]))
+                invalid.append(str(unplausible))
 
             subject_ids.append(subject_dir.name)
 
@@ -199,6 +195,25 @@ class ExtractorFilterer(Filterer):
         tractogram.data_per_streamline['score'] = scores
 
         save_tractogram(tractogram, tractogram_file, bbox_valid_check=False)
+
+def get_single_file_glob(path, pattern, exclude=None):
+    # This function takes in a path and a pattern and finds a single file matching the pattern.
+    if not isinstance(path, (Path)):
+        path = Path(path)
+
+    files = path.glob(pattern)
+
+    if exclude is not None:
+        files = [f for f in files if exclude not in f.name]
+    else:
+        files = list(files)
+
+    if len(files) == 1:
+        return files[0]
+    elif len(files) == 0:
+        return None
+    else:
+        raise ValueError(f"Multiple files found for pattern {pattern} in {path}.")
 
 def verify_root_structure(root_dir, requires_t1w=False):
     # We need to make sure that the root_dir as the following structure:
