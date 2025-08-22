@@ -590,6 +590,11 @@ def add_rbx_args(parser: ArgumentParser):
                      ' If not provided, the filterer will use the Docker image.')
     rbx.add_argument('--atlas_directory', type=str, default=None,
                      help='Directory containing the atlas for the RBX filterer.')
+    
+def add_nextflow_args(parser: ArgumentParser):
+    nxf = parser.add_argument_group('Nextflow')
+    nxf.add_argument("--use_apptainer", action="store_true",
+                     help="Whether to use Apptainer for the downstream filtering algorithms.")
 
 def add_oracle_args(parser: ArgumentParser):
     oracle = parser.add_argument_group('Oracle')

@@ -1,32 +1,28 @@
-from tractoracle_irt.filterers.filterer import Filterer
-from dipy.io.stateful_tractogram import StatefulTractogram
-
-import argparse
-import tempfile
-import numpy as np
-import subprocess
-import nibabel as nib
+import os
 import nextflow
 
 from dipy.io.streamline import load_tractogram
 from dipy.io.streamline import save_tractogram
 import os
-import glob
 from pathlib import Path
-from typing import Union
+import numpy as np
 
+from tractoracle_irt.filterers.filterer import Filterer
 from tractoracle_irt.filterers.nextflow import build_pipeline_command
 from tractoracle_irt.utils.logging import get_logger
-from tractoracle_irt.utils.utils import get_project_root_dir, is_running_on_slurm
 
 LOGGER = get_logger(__name__)
-
-DOCKER_IMAGE = "mrzarfir/extractorflow-fixed:latest"
 
 # TODO: Add the streamline sampler.
 class ExtractorFilterer(Filterer):
         
-    def __init__(self, templates_dir, end_space="orig", keep_intermediate_steps=True, quick_registration=True, sif_img_path: str = None, pipeline_path: str = "levje/nf-extractor -r 6dcae7b"):
+    def __init__(self,
+                 templates_dir: str,
+                 use_apptainer: bool = False,
+                 end_space: str = "orig",
+                 keep_intermediate_steps: bool = False,
+                 quick_registration: bool = True,
+                 pipeline_path: str = "levje/nf-extractor -r main"):
         super(ExtractorFilterer, self).__init__()
         self.templates_dir = templates_dir
         if self.templates_dir is None:
@@ -34,17 +30,16 @@ class ExtractorFilterer(Filterer):
         elif not os.path.exists(self.templates_dir):
             raise ValueError(f"Templates directory does not exist: {self.templates_dir}")
 
-        pipeline_image = sif_img_path if sif_img_path is not None else DOCKER_IMAGE
-        use_docker = sif_img_path is None
-        self.pipeline_command = build_pipeline_command(pipeline_path, use_docker=use_docker, img_path=pipeline_image, path_only=True)
-        self.flow_configs = [ ] # TODO
+        self.pipeline_command = build_pipeline_command(pipeline_path,
+                                                       use_apptainer)
 
         self.profiles = []
-        if use_docker:
-            self.profiles.append('docker')
-        else:
+        if use_apptainer:
             self.profiles.append('apptainer')
+        else:
+            self.profiles.append('docker')
         
+
         self.keep_intermediate_steps = keep_intermediate_steps
         self.quick_registration = quick_registration
         self.end_space = end_space
@@ -54,6 +49,12 @@ class ExtractorFilterer(Filterer):
             self.space_directory = "orig_space"
         else:
             raise ValueError(f"Space {end_space} is not supported.")
+        
+        self.extra_params = {
+            "quick_registration": verify_param_type_as_str(quick_registration, bool),
+            "keep_intermediate_steps": verify_param_type_as_str(keep_intermediate_steps, bool),
+            "orig": verify_param_type_as_str(self.ends_up_in_orig_space, bool)
+        }
 
     @property
     def ends_up_in_orig_space(self):
@@ -78,9 +79,7 @@ class ExtractorFilterer(Filterer):
         params = {
             "input": in_directory,
             "templates_dir": self.templates_dir,
-            "quick_registration": str(self.quick_registration).lower(),
-            "orig": str(self.ends_up_in_orig_space).lower(), 
-            "keep_intermediate_steps": str(self.keep_intermediate_steps).lower()
+            **self.extra_params
         }
         
         results_dir = self._run_pipeline(params, out_dir)
@@ -93,7 +92,6 @@ class ExtractorFilterer(Filterer):
         for execution in nextflow.run_and_poll(sleep=5,
                     pipeline_path=self.pipeline_command,
                     run_path=run_path,
-                    configs=self.flow_configs,
                     params=params,
                     profiles=self.profiles):
             LOGGER.info("Running Extractor pipeline. ")
@@ -245,3 +243,8 @@ def verify_root_structure(root_dir, requires_t1w=False):
             return False
     print("Root structure is valid.")
     return True
+
+def verify_param_type_as_str(value, exp_type):
+    if not isinstance(value, exp_type):
+        raise TypeError(f"Expected {exp_type} but got {type(value)} for value: {value}")
+    return str(value).lower()

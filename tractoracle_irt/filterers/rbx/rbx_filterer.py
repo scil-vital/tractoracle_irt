@@ -1,10 +1,6 @@
 from tractoracle_irt.filterers.filterer import Filterer
-from dipy.io.stateful_tractogram import StatefulTractogram
 
-import argparse
-import tempfile
 import numpy as np
-import subprocess
 import nibabel as nib
 import nextflow
 import json
@@ -13,16 +9,11 @@ from dipy.io.streamline import load_tractogram
 from dipy.io.streamline import save_tractogram
 import os
 from pathlib import Path
-from typing import Union
 
 from tractoracle_irt.utils.logging import get_logger
-from tractoracle_irt.utils.utils import get_project_root_dir
 from tractoracle_irt.filterers.nextflow import build_pipeline_command
 
 LOGGER = get_logger(__name__)
-
-# Using the image mrzarfir/scilus:1.6.0 should also work.
-DOCKER_IMAGE = "mrzarfir/scilus:2.1.0"
 
 RESULTS_INDICES_DIRNAME = "COMPILE_REPORTS"
 RESULTS_INDICES_FILENAME = ""
@@ -30,20 +21,16 @@ RESULTS_INDICES_FILENAME = ""
 # TODO: Add the streamline sampler.
 class RbxFilterer(Filterer):
 
-    def __init__(self, atlas_directory: str, sif_img_path: str = None, pipeline_path: str = "levje/nf-rbx -r 1538f45"):
+    def __init__(self, atlas_directory: str, use_apptainer: bool = False, pipeline_path: str = "levje/nf-rbx -r main"):
         super(RbxFilterer, self).__init__()
 
-        pipeline_image = sif_img_path if sif_img_path is not None else DOCKER_IMAGE
-        use_docker = sif_img_path is None
         self.pipeline_command = build_pipeline_command(pipeline_path,
-                                                       use_docker=use_docker,
-                                                       img_path=pipeline_image,
-                                                       path_only=True)
+                                                       use_apptainer)
         self.profiles = ['essential', 'compile_reports']
-        if use_docker:
-            self.profiles.append('docker')
-        else:
+        if use_apptainer:
             self.profiles.append('apptainer')
+        else:
+            self.profiles.append('docker')
 
         self.flow_configs = []
         self.atlas_directory = atlas_directory

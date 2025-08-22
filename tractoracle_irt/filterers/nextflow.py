@@ -1,6 +1,6 @@
 import os
 
-def build_pipeline_command(pipeline: str, use_docker: bool, img_path: str, path_only: bool = False) -> str:
+def build_pipeline_command(pipeline: str, use_apptainer: bool, img_path: str = None) -> str:
     """
     Build the nextflow command to run a pipeline.
     As most nextflow pipelines we use are designed to run in a containerized environment,
@@ -20,15 +20,15 @@ def build_pipeline_command(pipeline: str, use_docker: bool, img_path: str, path_
     Returns:
         str: The command to run the RBX pipeline.
     """
-    if path_only:
+    if img_path is None:
         return pipeline
     
-    if use_docker:
-        return f"{pipeline} -with-docker {img_path}"
-    else:
+    if use_apptainer:
         if not img_path:
             raise ValueError("When using Singularity/Apptainer, the img_path must be provided.")
         if not os.path.exists(img_path):
             raise FileNotFoundError(f"The specified Singularity/Apptainer image does not exist: {img_path}")
         return f"{pipeline} -with-singularity {img_path}"
+    else:
+        return f"{pipeline} -with-docker {img_path}"
 

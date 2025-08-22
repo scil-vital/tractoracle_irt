@@ -43,18 +43,19 @@ class HParams:
 
     # Extractor parameters
     extractor_validator: bool
-    extractor_sif_img_path: str
     extractor_target: str
     extractor_templates: str
 
     # RBX Filterer parameters
     rbx_validator: bool
-    rbx_sif_img_path: str
     atlas_directory: str
 
     # Verifyber Filterer parameters
     verifyber_validator: bool
     verifyber_sif_img_path: str
+
+    # Apptainer parameters
+    use_apptainer: bool
 
     # Tracking parameters
     npv: int

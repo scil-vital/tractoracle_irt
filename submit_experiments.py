@@ -157,7 +157,9 @@ def main():
 
         # For now, we need to manually register the extra parameters too.
         # If the dataset has a field "tractometer_reference", add it to the extra flags
+        pm.add_param("--tracking_n_subjects", config.get("tracking_n_subjects", None))
         pm.add_param("--warmup_agent_steps", config.get("warmup_agent_steps", None))
+        pm.add_flag_if_true("--use_apptainer", config.get("use_apptainer", False))
         pm.add_flag_if_true("--tractometer_validator", config.get("tractometer_validator", False))
         pm.add_param("--tractometer_reference", config.get("tractometer_reference", None))
         pm.add_param("--scoring_data", config_manager.data_config[dataset_name].get("scoring_data", None))

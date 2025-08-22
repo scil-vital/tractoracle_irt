@@ -63,6 +63,7 @@ class RlhfHParams(CrossQHParams):
     nb_new_streamlines_per_iter: int
     max_dataset_size: int
     warmup_agent_steps: int
+    tracking_n_subjects: int
 
     dataset_to_augment: str = None
 
@@ -231,7 +232,7 @@ class RlhfTraining(Training):
         Parameters:
         -----------
             alg: RLAlgorithm
-                The RL algorithm, either TD3, PPO or any others
+                The RL algorithm
             env: BaseEnv
                 The tracking environment
             valid_env: BaseEnv
@@ -292,19 +293,19 @@ class RlhfTraining(Training):
                 TractometerFilterer(self.hp.scoring_data, self.hp.tractometer_reference,
                                 dilate_endpoints=self.hp.tractometer_dilate))
             
+        if self.hp.rbx_validator:
+            self.filterers.append(
+                RbxFilterer(self.hp.atlas_directory, self.hp.use_apptainer))
+            
         if self.hp.extractor_validator:
             self.filterers.append(
-                ExtractorFilterer(templates_dir=self.hp.extractor_templates, sif_img_path=self.hp.extractor_sif_img_path))
+                ExtractorFilterer(self.hp.extractor_templates, self.hp.use_apptainer))
             
             self.extractor_filterer = self.filterers[-1]
 
         if self.hp.verifyber_validator:
             self.filterers.append(
                 VerifyberFilterer(self.hp.verifyber_sif_img_path))
-        
-        if self.hp.rbx_validator:
-            self.filterers.append(
-                RbxFilterer(self.hp.atlas_directory, self.hp.rbx_sif_img_path))
 
         if len(self.filterers) < 1:
             raise ValueError("At least one of the filterers must be enabled.")
@@ -395,7 +396,8 @@ class RlhfTraining(Training):
                             "Generating tractograms for RLHF training...")
                         root_dir, tractograms, transform_map = \
                             self.generate_and_save_tractograms(
-                                self.tracker, self.tracker_env, tractograms_path)
+                                self.tracker, self.tracker_env, tractograms_path,
+                                max_nb_subjects=self.hp.tracking_n_subjects)
 
                         # Filter the tractogram
                         filtered_path = os.path.join(sub_tmpdir, "filtered")
@@ -682,7 +684,7 @@ def add_rlhf_training_args(parser: argparse.ArgumentParser):
     rlhf_group = parser.add_argument_group("RLHF Training Arguments")
     rlhf_group.add_argument('--alg', type=str, required=True,
                             help='The algorithm to use for training the agent.\n'
-                            'Possible values are: SACAuto, PPO.')
+                            'Possible values are: SACAuto, CrossQ.')
     rlhf_group.add_argument('--num_workers', type=int, default=10,
                             help='Number of workers to use for data loading.')
     rlhf_group.add_argument("--rlhf_inter_npv", type=int, default=None,
@@ -694,6 +696,9 @@ def add_rlhf_training_args(parser: argparse.ArgumentParser):
                             help="Maximum number of streamlines to keep in the dataset.")
     rlhf_group.add_argument("--warmup_agent_steps", type=int,
                             help="Minimum number of steps to warm up the agent before starting the training of the oracle")
+    rlhf_group.add_argument("--tracking_n_subjects", type=int, default=5,
+                            help="Maximum number of subjects from which to generate streamlines\n"
+                            "for the IRT training pipeline.")
 
     # Agent training RLHF arguments
     agent_group = parser.add_argument_group("Agent Training Arguments")

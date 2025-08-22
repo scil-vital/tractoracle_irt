@@ -75,17 +75,17 @@ data:
     name: "ismrm2015"
     location:
       local: "{{PROJECTDIR}}/data/datasets/ismrm2015_2mm/ismrm2015.hdf5"
-      cluster: "~/projects/def-pmjodoin/levje/datasets/ismrm2015_2mm_ttl.tar.gz"
+      cluster: "~/projects/rrg-descotea/vitalab/levje/datasets/ismrm2015/ismrm2015_2mm.tar.gz"
   tractoinferno: 
     name: "tractoinferno"
     location:
-      local: "{{PROJECTDIR}}/data/datasets/TractoInferno/tractoinferno_small_fa.hdf5"
-      cluster: ""
+      local: "{{PROJECTDIR}}/data/datasets/TractoInferno/tractoinferno_single_fa.hdf5"
+      cluster: "~/projects/rrg-descotea/vitalab/levje/datasets/tractoinferno/tractoinferno_fa.hdf5"
   hcp: 
     name: "hcp"
     location:
-      local: ""
-      cluster: ""
+      local: "{{PROJECTDIR}}/data/datasets/hcp/hcp_full_100_fa.hdf5"
+      cluster: "~/projects/rrg-descotea/vitalab/levje/datasets/hcp_full_100/hcp_full_100_fa.hdf5"
 
 ######################################
 ## Global configuration
@@ -121,12 +121,12 @@ global:
   oracle_bonus: 10
   oracle_validator: True
   oracle_stopping_criterion: True
-  reward_ckpt:
+  reward_ckpt: 
     local: "public://inferno_rbx"
-    cluster: ""
+    cluster: "public://inferno_rbx"
   crit_ckpt:
     local: "public://inferno_rbx"
-    cluster: ""
+    cluster: "public://inferno_rbx"
   
   # Neighborhood
   neighborhood_type: "axes"
@@ -168,6 +168,7 @@ extras:
     rlhf_inter_npv: 2
     oracle_batch_size: 1024
     num_workers: 4
+    tracking_n_subjects: 1
 
   tractometer:
     tractometer_validator: True
@@ -180,21 +181,20 @@ extras:
 
   rbx:
     rbx_validator: True
-    rbx_sif_img_path: null # Set this value to the path of the singularity image (otherwise, it will use docker by default).
     atlas_directory: "public://rbx_atlas"
 
   extractor:
     extractor_validator: True
-    extractor_sif_img_path: null # Set this value to the path of the singularity image (otherwise, it will use docker by default).
     extractor_templates: "public://extractor_templates"
-    
-    # This MNI template was extracted from: https://github.com/scilus/extractor_flow/blob/dev2023/containers/templates_and_ROIs.tar.bz2
-    # Only the file used as a target by extractor_flow to register the tractograms into the MNI space was kept.
-    # extractor_target: "public://extractor_target"
 
   verifyber:
     verifyber_validator: True
-    verifyber_sif_img_path: null # Set this value to the path of the singularity image (otherwise, it will use docker by default).
+    verifyber_sif_img_path: null # Set this value to the path of the singularity image.
+
+  # Add this configuration to the experiment's extras
+  # to use singularity containers instead of Docker.
+  apptainer:
+    use_apptainer: True
 
 ######################################
 ## Experiment configurations
@@ -209,11 +209,32 @@ experiments:
     launch_script: "tractoracle_irt/trainers/sac_auto_train.py"
     max_ep: 3000
 
-  - exp_name: "CrossQ-IRT-3K"
+  - exp_name: "CrossQ-IRT-RBX"
     launch_script: "tractoracle_irt/trainers/rlhf_train_simple.py"
     alg: "CrossQ"
-    extra_type: ["rlhf", "extractor"]
+    extra_type: ["rlhf", "rbx"] # add "apptainer" to use apptainer containers
     cpus: 8
     mem: "70000M"
-    warmup_agent_steps: 300
+    warmup_agent_steps: 1
     max_ep: 20 # 20 IRT loops (each loop is 150 agent training steps)
+    agent_checkpoint: "public://crossq_irt_inferno"
+
+  - exp_name: "CrossQ-IRT-EXT"
+    launch_script: "tractoracle_irt/trainers/rlhf_train_simple.py"
+    alg: "CrossQ"
+    extra_type: ["rlhf", "extractor"] # add "apptainer" to use apptainer containers
+    cpus: 8
+    mem: "70000M"
+    warmup_agent_steps: 1
+    max_ep: 20 # 20 IRT loops (each loop is 150 agent training steps)
+    agent_checkpoint: "public://crossq_irt_inferno"
+
+  - exp_name: "CrossQ-IRT-VER"
+    launch_script: "tractoracle_irt/trainers/rlhf_train_simple.py"
+    alg: "CrossQ"
+    extra_type: ["rlhf", "verifyber"] # add "apptainer" to use apptainer containers
+    cpus: 8
+    mem: "70000M"
+    warmup_agent_steps: 1
+    max_ep: 20 # 20 IRT loops (each loop is 150 agent training steps)
+    agent_checkpoint: "public://crossq_irt_inferno"

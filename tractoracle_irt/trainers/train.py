@@ -21,7 +21,8 @@ from tractoracle_irt.experiment.experiment import (add_data_args,
                                                 add_tractometer_args,
                                                 add_extractor_args,
                                                 add_verifyber_args,
-                                                add_rbx_args)
+                                                add_rbx_args,
+                                                add_nextflow_args)
 from tractoracle_irt.experiment.oracle_validator import OracleValidator
 from tractoracle_irt.experiment.tractometer_validator import TractometerValidator
 from tractoracle_irt.experiment.experiment import Experiment
@@ -442,3 +443,4 @@ def add_training_args(parser):
     add_extractor_args(parser)
     add_rbx_args(parser)
     add_verifyber_args(parser)
+    add_nextflow_args(parser)
