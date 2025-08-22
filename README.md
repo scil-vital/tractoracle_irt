@@ -52,9 +52,9 @@ module load rust
 ```
 
 ### Install external dependencies
-- [**Nextflow**](https://www.nextflow.io/docs/latest/install.html): We recommend installing version 21.10.3 (or a similar version), as most of the flows we use (i.e. rbx_flow, extractor_flow) do not support Nextflow's DSL2. Nextflow is required to run [RecobundlesX](https://github.com/levje/rbx_flow) and [extractor_flow](https://github.com/scilus/extractor_flow), which are used during the IRT procedure.
+- [**Nextflow**](https://www.nextflow.io/docs/latest/install.html): We recommend installing version >22.11.0-edge, as our flows utilize Apptainer images (which are supported above this version). Nextflow is required to run [RecobundlesX](https://github.com/levje/rbx_flow) and [extractor_flow](https://github.com/scilus/extractor_flow), which are used during the IRT procedure.
 - [**Docker**](https://www.docker.com/get-started/): docker is required to run IRT training when running [RecobundlesX](https://github.com/levje/rbx_flow), [extractor_flow](https://github.com/scilus/extractor_flow) and Verifyber.
-- [**Apptainer**](https://apptainer.org/docs/admin/main/installation.html): Although we prefer the use of docker to spawn containers, we also support Apptainer/Singularity images which requires the installation of Apptainer. To use Apptainer instead of Docker containers for IRT training, please refer to [this guide](docs/using_apptainer.md).
+- [**Apptainer**](https://apptainer.org/docs/admin/main/installation.html): Although we prefer the use of docker to spawn containers, we also support Apptainer images which requires the installation of Apptainer. To use Apptainer instead of Docker containers for IRT training, please refer to [this guide](docs/using_apptainer.md).
 
 ## Publicly available files
 For convenience and to ensure reproducibility of our experiments, we have made several files available that can be downloaded automatically upon request in [configs/defaults/public_files.yml](configs/defaults/public_files.yml).
