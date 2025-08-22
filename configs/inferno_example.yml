@@ -189,7 +189,7 @@ extras:
 
   verifyber:
     verifyber_validator: True
-    verifyber_sif_img_path: null # Set this value to the path of the singularity image.
+    verifyber_sif_img_path: null # Possibly: $NXF_SINGULARITY_CACHEDIR/verifyber_image.sif
 
   # Add this configuration to the experiment's extras
   # to use singularity containers instead of Docker.
