@@ -215,7 +215,7 @@ experiments:
     extra_type: ["rlhf", "rbx"] # add "apptainer" to use apptainer containers
     cpus: 8
     mem: "70000M"
-    warmup_agent_steps: 1
+    warmup_agent_steps: 10
     max_ep: 20 # 20 IRT loops (each loop is 150 agent training steps)
     agent_checkpoint: "public://crossq_irt_inferno"
 
@@ -225,7 +225,7 @@ experiments:
     extra_type: ["rlhf", "extractor"] # add "apptainer" to use apptainer containers
     cpus: 8
     mem: "70000M"
-    warmup_agent_steps: 1
+    warmup_agent_steps: 10
     max_ep: 20 # 20 IRT loops (each loop is 150 agent training steps)
     agent_checkpoint: "public://crossq_irt_inferno"
 
@@ -235,6 +235,6 @@ experiments:
     extra_type: ["rlhf", "verifyber"] # add "apptainer" to use apptainer containers
     cpus: 8
     mem: "70000M"
-    warmup_agent_steps: 1
+    warmup_agent_steps: 10
     max_ep: 20 # 20 IRT loops (each loop is 150 agent training steps)
     agent_checkpoint: "public://crossq_irt_inferno"
