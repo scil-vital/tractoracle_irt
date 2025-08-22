@@ -95,7 +95,7 @@ class ExtractorFilterer(Filterer):
                     params=params,
                     profiles=self.profiles):
             LOGGER.info("Running Extractor pipeline. ")
-            LOGGER.info(execution.stdout)
+            # LOGGER.info(execution.stdout)
         
         if execution.return_code == '0':
             LOGGER.info("Extractor pipeline executed successfully. "
