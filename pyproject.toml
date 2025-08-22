@@ -33,7 +33,8 @@ dependencies = [
     "torchaudio>=2.6.0",
     "numpy==1.25.*",
     "comet-ml>=3.22.0",
-    "pyyaml>=6.0"
+    "pyyaml>=6.0",
+    "nf-core"
 ]
 
 [project.urls]
