@@ -26,10 +26,12 @@ module load apptainer nextflow
 ```bash
 # Define where your singularity images should be downloaded.
 # The images can take a lot of space, choose the path accordingly.
-export NXF_SINGULARITY_CACHEDIR=$HOME/.nextflow-images
+export NXF_APPTAINER_CACHEDIR=$HOME/.nextflow-images
+export NXF_SINGULARITY_CACHEDIR=$NXF_APPTAINER_CACHEDIR
 export APPTAINER_CACHEDIR=$NXF_SINGULARITY_CACHEDIR/.apptainer/cache
 
 # Add them to your path
+echo "export NXF_APPTAINER_CACHEDIR=$NXF_APPTAINER_CACHEDIR" >> ~/.bashrc
 echo "export NXF_SINGULARITY_CACHEDIR=$NXF_SINGULARITY_CACHEDIR" >> ~/.bashrc
 echo "export APPTAINER_CACHEDIR=$APPTAINER_CACHEDIR" >> ~/.bashrc
 ```

@@ -28,12 +28,21 @@ def is_torch_type(dtype):
     return dtype in torch_to_np
 
 global CPU_WARNING_WAS_PRINTED
+global GPU_DEVICE_FOUND_WAS_PRINTED
 CPU_WARNING_WAS_PRINTED = False
+GPU_DEVICE_FOUND_WAS_PRINTED = False
 def get_device():
     global CPU_WARNING_WAS_PRINTED
     if torch.cuda.is_available():
+        if not GPU_DEVICE_FOUND_WAS_PRINTED:
+            GPU_DEVICE_FOUND_WAS_PRINTED = True
+            LOGGER.info(f"Using CUDA GPU device.")
+
         return torch.device("cuda")
     elif torch.backends.mps.is_available():
+        if not GPU_DEVICE_FOUND_WAS_PRINTED:
+            GPU_DEVICE_FOUND_WAS_PRINTED = True
+            LOGGER.info(f"Using MPS GPU device.")
         return torch.device("mps")
     else:
         if not CPU_WARNING_WAS_PRINTED:
